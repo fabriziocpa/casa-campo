@@ -1,26 +1,100 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "lenis/dist/lenis.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* CasaCampo brand tokens */
+  --color-ink:        #111111;
+  --color-bg:         #faf7f2;
+  --color-sand:       #ebe1d2;
+  --color-teal-deep:  #0f3a36;
+  --color-teal:       #1f6f63;
+  --color-teal-soft:  #cfe2dd;
+  --color-gold:       #b89767;
+  --color-rose-muted: #d9b8b2;
+  --color-line:       #d7cfc0;
+
+  /* shadcn token mapping */
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:          var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:              var(--muted);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-accent:             var(--accent);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-destructive:        var(--destructive);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-ring:               var(--ring);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-popover:            var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-sidebar-ring:       var(--sidebar-ring);
+  --color-sidebar-border:     var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent:     var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary:    var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar:            var(--sidebar);
+
+  --font-sans:    var(--font-poppins);
+  --font-heading: var(--font-poppins);
+  --font-mono:    ui-monospace, monospace;
+
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* CasaCampo light theme */
+  --background:         #faf7f2;
+  --foreground:         #111111;
+  --card:               #ffffff;
+  --card-foreground:    #111111;
+  --popover:            #ffffff;
+  --popover-foreground: #111111;
+  --primary:            #0f3a36;
+  --primary-foreground: #faf7f2;
+  --secondary:          #ebe1d2;
+  --secondary-foreground: #111111;
+  --muted:              #ebe1d2;
+  --muted-foreground:   #6b6055;
+  --accent:             #1f6f63;
+  --accent-foreground:  #faf7f2;
+  --destructive:        oklch(0.577 0.245 27.325);
+  --border:             #d7cfc0;
+  --input:              #d7cfc0;
+  --ring:               #1f6f63;
+  --radius:             0.5rem;
+  --sidebar:            #faf7f2;
+  --sidebar-foreground: #111111;
+  --sidebar-primary:    #0f3a36;
+  --sidebar-primary-foreground: #faf7f2;
+  --sidebar-accent:     #ebe1d2;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border:     #d7cfc0;
+  --sidebar-ring:       #1f6f63;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
