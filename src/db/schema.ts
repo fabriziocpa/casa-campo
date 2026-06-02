@@ -156,7 +156,13 @@ export const seasonalOverrides = pgTable(
     name:       text("name").notNull(),
     startDate:  date("start_date").notNull(),
     endDate:    date("end_date").notNull(),
-    priceCents: integer("price_cents").notNull(),
+    // adjustType "absolute": priceCents is the override price.
+    // adjustType "percent":  percent is applied to the base modality price
+    //                        (priceCents ignored / kept 0); result rounds to
+    //                        whole sol so displayed prices stay .00.
+    adjustType: text("adjust_type").notNull().default("absolute").$type<"absolute" | "percent">(),
+    priceCents: integer("price_cents").notNull().default(0),
+    percent:    integer("percent"),
     minNights:  integer("min_nights"),
     active:     boolean("active").notNull().default(true),
     createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

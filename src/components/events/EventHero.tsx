@@ -1,15 +1,10 @@
 import Image from "next/image";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { EVENT_HERO } from "@/config/media-manifest";
 import type { Property } from "@/db/seed";
 
-const EVENT_HERO_IMAGES = [
-  { src: "/fotos/evento_1.avif", alt: "Evento al aire libre" },
-  { src: "/fotos/evento_2.avif", alt: "Celebración con invitados" },
-  { src: "/fotos/evento_3.avif", alt: "Espacio de eventos" },
-];
-
 export function EventHero({ property }: { property: Property }) {
-  const hero = EVENT_HERO_IMAGES[0];
+  const hero = EVENT_HERO;
 
   return (
     <section className="relative h-[70vh] min-h-[480px] w-full overflow-hidden">

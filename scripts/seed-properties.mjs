@@ -46,13 +46,13 @@ const PROPERTIES = [
     pet_policy_note: "Mascotas solo con acuerdo previo con el anfitrión.",
     events_enabled: false,
     active: true,
-    order: 0,
+    order: 1,
   },
   {
     id: CASA_GRANDE_ID,
     slug: "casa-grande",
-    name: "Casa Grande",
-    short_name: "Casa Grande",
+    name: "Casa Principal",
+    short_name: "Casa Principal",
     tagline: "Donde la calma encuentra hogar",
     description_short: "Casa de campo con acceso directo al río Moche.",
     description_long:
@@ -61,20 +61,20 @@ const PROPERTIES = [
       "Quirihuac, valle del río Moche, La Libertad (a las afueras de Trujillo).",
     latitude: "-7.985000",
     longitude: "-78.832000",
-    checkin_time: "14:00",
+    checkin_time: "15:00",
     checkout_time: "12:00",
     full_checkin_time: "09:00",
     full_checkout_time: "18:00",
     base_capacity: 12,
     max_capacity: 16,
     extra_person_cents: 0,
-    min_nights_default: 2,
+    min_nights_default: 1,
     pet_policy: "pet_friendly",
     pet_policy_note:
       "Bienvenidas las mascotas — mantén supervisión cerca del río.",
     events_enabled: true,
     active: true,
-    order: 1,
+    order: 0,
   },
 ];
 
@@ -111,11 +111,13 @@ const PRICING_MODALITIES = [
   ["31111111-0000-0000-0000-000000000002", CHALET_ID, "1 noche Vie-Sáb-Dom", "per_night", 97, null, 80000, 1, null, 10],
   ["31111111-0000-0000-0000-000000000003", CHALET_ID, "Full 2 días 1 noche Lun-Vie", "full_package", 62, null, 105000, 1, 1, 20],
   ["31111111-0000-0000-0000-000000000004", CHALET_ID, "Full 2 días 1 noche Sáb-Dom", "full_package", 65, null, 140000, 1, 1, 20],
-  // Casa Grande
-  ["32222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "2 días 12 personas Lun-Jue", "full_package", 30, 12, 205000, 1, 1, 10],
-  ["32222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "2 días 12 personas Vie-Sáb-Dom", "full_package", 97, 12, 225000, 1, 1, 10],
-  ["32222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "2 días 16 personas Lun-Jue", "full_package", 30, 16, 225000, 1, 1, 20],
-  ["32222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "2 días 16 personas Vie-Sáb-Dom", "full_package", 97, 16, 249000, 1, 1, 20],
+  // Casa Grande — night count decides the rate (see resolveStay):
+  //   1 noche -> "Horario full" package; 2+ noches -> "Por noche" rate (min 2).
+  //   Both run every day (dayMask 127). 16-tier unlocks the Cabaña.
+  ["32222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "Por noche — 12 personas", "per_night", 127, 12, 140000, 2, null, 10],
+  ["32222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "Por noche — 16 personas", "per_night", 127, 16, 165000, 2, null, 20],
+  ["32222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "Horario full — 12 personas", "full_package", 127, 12, 225000, 1, 1, 10],
+  ["32222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "Horario full — 16 personas", "full_package", 127, 16, 255000, 1, 1, 20],
 ];
 
 // Event packages (Casa Grande only)
@@ -135,7 +137,7 @@ const ROOMS = [
   ["b2222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "1er piso", "Habitación familiar", "Dos camas de 2 plazas + una cuna disponible bajo solicitud.", [{ size: "2 plazas", count: 2 }], true, 1],
   ["b2222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "2do piso", "Dormitorio doble A", "Dos camas individuales, ventana al jardín.", [{ size: "1 plaza", count: 2 }], false, 2],
   ["b2222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "2do piso", "Dormitorio doble B", "Una cama queen + un sofá-cama de 1 plaza.", [{ size: "Queen", count: 1 }, { size: "1 plaza (sofá-cama)", count: 1 }], false, 3],
-  ["b2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "Casa Grande · Cabaña", "Cabaña", "Cabaña independiente con cuatro camas individuales. Se habilita exclusivamente para grupos de más de 12 personas (tarifa 16).", [{ size: "1 plaza", count: 4 }], true, 4],
+  ["b2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "Casa Principal · Cabaña", "Cabaña", "Cabaña independiente con cuatro camas individuales. Se habilita exclusivamente para grupos de más de 12 personas (tarifa 16).", [{ size: "1 plaza", count: 4 }], true, 4],
 ];
 
 // Amenities — deterministic UUIDs derived from amen-c-NN / amen-q-NN slugs
@@ -177,8 +179,8 @@ const RULES = [
   ["d2222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "Convivencia", "Música a volumen moderado dentro del horario permitido.", 3],
   ["d2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "Mascotas", "Bienvenidas — supervisa cerca del río.", 4],
   ["d2222222-0000-0000-0000-000000000006", CASA_GRANDE_ID, "Mascotas", "Limpieza extra en caso de pelo o daños menores.", 5],
-  ["d2222222-0000-0000-0000-000000000007", CASA_GRANDE_ID, "Check-in/out", "Check-in desde las 14:00. Check-out hasta las 12:00.", 6],
-  ["d2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "Check-in/out", "Modalidad full: check-in 09:00 / check-out 18:00 del día siguiente.", 7],
+  ["d2222222-0000-0000-0000-000000000007", CASA_GRANDE_ID, "Check-in/out", "Tarifa por noche (2+ noches): check-in 15:00, check-out 12:00.", 6],
+  ["d2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "Check-in/out", "Horario full (1 noche): check-in 09:00 / check-out 18:00 del día siguiente.", 7],
   ["d2222222-0000-0000-0000-000000000009", CASA_GRANDE_ID, "Check-in/out", "La tarifa 16 (grupos de más de 12) habilita la Cabaña exclusiva; la tarifa 12 usa la casa principal.", 8],
   ["d2222222-0000-0000-0000-000000000010", CASA_GRANDE_ID, "Check-in/out", "Depósito de garantía S/ 300 reembolsable tras inspección.", 9],
 ];
@@ -208,12 +210,12 @@ const CONTENT = [
   // Casa Grande FAQs
   ["e2222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "faq.q.1", "¿La piscina está disponible todo el año?"],
   ["e2222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "faq.a.1", "Sí, la piscina está temperada y disponible todo el año."],
-  ["e2222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "faq.q.2", "¿Puedo hacer un evento en Casa Grande?"],
+  ["e2222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "faq.q.2", "¿Puedo hacer un evento en Casa Principal?"],
   ["e2222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "faq.a.2", "Sí, contamos con paquetes desde 20 hasta 150 personas. Revisa la sección Eventos."],
   ["e2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "faq.q.3", "¿Cuál es la diferencia entre tarifa 12 y 16 personas?"],
   ["e2222222-0000-0000-0000-000000000006", CASA_GRANDE_ID, "faq.a.3", "La tarifa 12 usa la casa principal (4 habitaciones). La tarifa 16, para grupos de más de 12, habilita además la Cabaña — un espacio exclusivo con 4 camas adicionales."],
   ["e2222222-0000-0000-0000-000000000007", CASA_GRANDE_ID, "faq.q.4", "¿Puedo llegar con mi mascota?"],
-  ["e2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "faq.a.4", "Sí, Casa Grande es pet-friendly. Supervisa cerca del río y el jardín."],
+  ["e2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "faq.a.4", "Sí, Casa Principal es pet-friendly. Supervisa cerca del río y el jardín."],
   ["e2222222-0000-0000-0000-000000000009", CASA_GRANDE_ID, "faq.q.5", "¿Qué incluye la modalidad full 2 días 1 noche?"],
   ["e2222222-0000-0000-0000-000000000010", CASA_GRANDE_ID, "faq.a.5", "Check-in 09:00 del primer día y check-out 18:00 del día siguiente: 33 horas de uso continuo."],
 

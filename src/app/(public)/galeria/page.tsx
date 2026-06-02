@@ -1,11 +1,11 @@
-import Image from "next/image";
 import { FadeIn } from "@/components/motion/FadeIn";
-import {
-  StaggerChildren,
-  StaggerItem,
-} from "@/components/motion/StaggerChildren";
+import { ClickableGallery } from "@/components/media/ClickableGallery";
 import { getActiveProperties } from "@/features/properties/queries";
-import { BRAND_PHOTOS, PROPERTY_PHOTOS } from "@/config/media-manifest";
+import {
+  BRAND_PHOTOS,
+  CABANA_PHOTOS,
+  PROPERTY_PHOTOS,
+} from "@/config/media-manifest";
 
 export default async function GaleriaPage() {
   const properties = await getActiveProperties();
@@ -23,7 +23,8 @@ export default async function GaleriaPage() {
             </h1>
             <p className="mt-6 text-bg/75 leading-relaxed">
               Cada rincón del valle, capturado para que sepas exactamente lo
-              que encontrarás cuando llegues.
+              que encontrarás cuando llegues. Toca cualquier imagen para verla
+              en grande.
             </p>
           </FadeIn>
         </div>
@@ -32,7 +33,9 @@ export default async function GaleriaPage() {
       <section className="mx-auto max-w-7xl px-6 py-16 space-y-24">
         {properties.map((property) => {
           const photos = PROPERTY_PHOTOS[property.slug] ?? [];
+          const isCasaGrande = property.slug === "casa-grande";
           if (photos.length === 0) return null;
+
           return (
             <div key={property.id}>
               <FadeIn>
@@ -43,26 +46,31 @@ export default async function GaleriaPage() {
                   {property.name}
                 </h2>
               </FadeIn>
-              <StaggerChildren className="mt-10 grid gap-3 grid-cols-2 md:grid-cols-3">
-                {photos.map((photo) => (
-                  <StaggerItem
-                    key={photo.src}
-                    className={`relative overflow-hidden rounded-xl bg-sand/30 ${
-                      photo.aspect === "portrait"
-                        ? "aspect-[3/4]"
-                        : "aspect-[4/3]"
-                    }`}
-                  >
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      fill
-                      sizes="(min-width: 768px) 33vw, 50vw"
-                      className="object-cover transition-transform duration-700 hover:scale-105"
-                    />
-                  </StaggerItem>
-                ))}
-              </StaggerChildren>
+
+              {isCasaGrande ? (
+                <>
+                  <FadeIn>
+                    <p className="mt-10 text-sm font-medium uppercase tracking-wider text-ink/60">
+                      La Casa
+                    </p>
+                  </FadeIn>
+                  <ClickableGallery
+                    photos={photos}
+                    className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-3"
+                  />
+                  <FadeIn>
+                    <p className="mt-14 text-sm font-medium uppercase tracking-wider text-ink/60">
+                      Casa Principal · Cabaña
+                    </p>
+                  </FadeIn>
+                  <ClickableGallery
+                    photos={CABANA_PHOTOS}
+                    className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-3"
+                  />
+                </>
+              ) : (
+                <ClickableGallery photos={photos} />
+              )}
             </div>
           );
         })}
@@ -77,22 +85,7 @@ export default async function GaleriaPage() {
                 Eventos y vida en el valle
               </h2>
             </FadeIn>
-            <StaggerChildren className="mt-10 grid gap-3 grid-cols-2 md:grid-cols-3">
-              {BRAND_PHOTOS.map((photo) => (
-                <StaggerItem
-                  key={photo.src}
-                  className="relative aspect-[4/3] overflow-hidden rounded-xl bg-sand/30"
-                >
-                  <Image
-                    src={photo.src}
-                    alt={photo.alt}
-                    fill
-                    sizes="(min-width: 768px) 33vw, 50vw"
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                  />
-                </StaggerItem>
-              ))}
-            </StaggerChildren>
+            <ClickableGallery photos={BRAND_PHOTOS} />
           </div>
         )}
       </section>

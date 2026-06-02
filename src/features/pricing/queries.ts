@@ -31,6 +31,25 @@ export async function getActiveModalitiesByProperty(
   ).sort((a, b) => a.priority - b.priority);
 }
 
+// Admin: all modalities (active + inactive) so the editor can re-enable.
+export async function getAllModalitiesByProperty(
+  propertyId: string,
+): Promise<PricingModality[]> {
+  try {
+    const rows = await db
+      .select()
+      .from(pricingModalities)
+      .where(eq(pricingModalities.propertyId, propertyId))
+      .orderBy(asc(pricingModalities.priority));
+    if (rows.length > 0) return rows as PricingModality[];
+  } catch (err) {
+    console.error("[pricing:queries] admin DB read failed:", err);
+  }
+  return PRICING_MODALITIES.filter((m) => m.propertyId === propertyId).sort(
+    (a, b) => a.priority - b.priority,
+  );
+}
+
 export async function getSeasonalOverridesByProperty(
   propertyId: string,
 ): Promise<SeasonalOverride[]> {

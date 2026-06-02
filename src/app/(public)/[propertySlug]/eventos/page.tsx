@@ -8,6 +8,7 @@ import {
   getSettings,
 } from "@/features/content/queries";
 import { EventHero } from "@/components/events/EventHero";
+import { EventGallery } from "@/components/events/EventGallery";
 import { EventValueProps } from "@/components/events/EventValueProps";
 import { EventPackagesGrid } from "@/components/events/EventPackagesGrid";
 import { EventIncludedList } from "@/components/events/EventIncludedList";
@@ -36,6 +37,7 @@ export default async function EventLandingPage({
     <main className="min-h-screen bg-bg">
       <EventHero property={property} />
       <EventValueProps props={valueProps} />
+      <EventGallery />
       <EventPackagesGrid packages={packages} />
       <EventIncludedList
         included={includedExcluded.included}

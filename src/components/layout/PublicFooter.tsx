@@ -39,7 +39,7 @@ export async function PublicFooter() {
                   href={`/${props.find((p) => p.eventsEnabled)?.slug}/eventos`}
                   className="hover:text-bg transition-colors"
                 >
-                  Eventos en Casa Grande
+                  Eventos en Casa Principal
                 </Link>
               </li>
             )}
