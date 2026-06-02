@@ -126,6 +126,7 @@ export default async function BrandLandingPage() {
           {propertiesWithPricing.map(({ property, minPriceCents }, idx) => {
             const reversed = idx % 2 === 1;
             const cover = PROPERTY_PHOTOS[property.slug]?.[0];
+            const hasCabana = property.slug === "casa-grande";
             return (
               <FadeIn key={property.id}>
                 <article
@@ -159,6 +160,26 @@ export default async function BrandLandingPage() {
                     <div className="absolute bottom-6 left-6 text-bg/95 text-sm uppercase tracking-widest drop-shadow">
                       {property.shortName}
                     </div>
+
+                    {hasCabana && (
+                      <div className="absolute top-5 right-5 w-32 md:w-40">
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-xl ring-2 ring-bg/80 shadow-lg">
+                          <Image
+                            src="/fotos/cabana_frontal.avif"
+                            alt="La Cabaña, espacio adicional de Casa Grande"
+                            fill
+                            sizes="160px"
+                            className="object-cover"
+                          />
+                          <span className="absolute inset-x-0 bottom-0 bg-black/55 px-2 py-1 text-center text-[10px] uppercase tracking-wider text-bg">
+                            + La Cabaña
+                          </span>
+                        </div>
+                        <p className="mt-2 text-center text-xs text-bg/90 drop-shadow">
+                          Incluye Cabaña · grupos 12+
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Text side */}

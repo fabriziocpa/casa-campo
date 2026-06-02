@@ -1,29 +1,27 @@
 export type Photo = { src: string; alt: string; aspect?: "landscape" | "portrait" };
 
+// Marca / inicio / galería "Momentos"
 export const BRAND_PHOTOS: Photo[] = [
   { src: "/fotos/casa_grande.avif", alt: "Casa Grande al atardecer", aspect: "landscape" },
-  { src: "/fotos/cabana_dia.avif", alt: "Cabaña durante el día", aspect: "landscape" },
+  { src: "/fotos/cabana_frontal.avif", alt: "Frontal de la Cabaña", aspect: "landscape" },
   { src: "/fotos/cabana_noche.avif", alt: "Cabaña iluminada de noche", aspect: "landscape" },
-  { src: "/fotos/evento_1.avif", alt: "Evento al aire libre", aspect: "landscape" },
+  { src: "/fotos/chalet.avif", alt: "Chalet en el valle", aspect: "landscape" },
+  { src: "/fotos/evento_khalessi_2.avif", alt: "Evento en el valle", aspect: "landscape" },
   { src: "/fotos/evento_2.avif", alt: "Celebración con invitados", aspect: "landscape" },
   { src: "/fotos/evento_3.avif", alt: "Espacio de eventos", aspect: "landscape" },
 ];
 
+// Fotos por propiedad — SOLO la casa (la Cabaña va aparte, ver CABANA_PHOTOS)
 export const PROPERTY_PHOTOS: Record<string, Photo[]> = {
   "casa-grande": [
     { src: "/fotos/casa_grande.avif", alt: "Casa Grande al atardecer", aspect: "landscape" },
     { src: "/casa grande/sala_horizontal.avif", alt: "Sala principal", aspect: "landscape" },
     { src: "/casa grande/vista_piscina_horizontal.avif", alt: "Vista a la piscina", aspect: "landscape" },
     { src: "/casa grande/comedor_vertical.avif", alt: "Comedor", aspect: "portrait" },
-    { src: "/casa grande/cuarto2_horizontal.avif", alt: "Habitación doble", aspect: "landscape" },
-    { src: "/casa grande/cuarto2_bano_vertical.avif", alt: "Baño habitación", aspect: "portrait" },
+    { src: "/casa grande/cuarto1_horizontal.avif", alt: "Dormitorio principal", aspect: "landscape" },
+    { src: "/casa grande/cuarto2_horizontal.avif", alt: "Dormitorio doble", aspect: "landscape" },
     { src: "/casa grande/cuarto3_horizontal.avif", alt: "Otra habitación", aspect: "landscape" },
-    { src: "/casa grande/cuarto3_bano_vertical.avif", alt: "Baño en suite", aspect: "portrait" },
-    // Cabaña — exclusiva para grupos 12+ (tarifa 16). Pertenece a Casa Grande.
-    { src: "/cabana/jardin_cabana_vertical.avif", alt: "Jardín de la Cabaña", aspect: "portrait" },
-    { src: "/cabana/cocina_cabana_vertical.avif", alt: "Cocina de la Cabaña", aspect: "portrait" },
-    { src: "/cabana/cuarto_cabana_horizontal.avif", alt: "Habitación de la Cabaña", aspect: "landscape" },
-    { src: "/cabana/tele_cabana_vertical.avif", alt: "Sala con TV en la Cabaña", aspect: "portrait" },
+    { src: "/casa grande/cuarto_4.avif", alt: "Habitación adicional", aspect: "landscape" },
   ],
   chalet: [
     { src: "/chalet/terraza.avif", alt: "Chalet durante el día", aspect: "landscape" },
@@ -38,3 +36,29 @@ export const PROPERTY_PHOTOS: Record<string, Photo[]> = {
     { src: "/chalet/cuarto_pequeno_vertical.avif", alt: "Cuarto adicional", aspect: "portrait" },
   ],
 };
+
+// La Cabaña — espacio aparte dentro de Casa Grande, exclusivo para grupos 12+ (tarifa 16).
+// Frontal primero (cabana_frontal.avif) como portada del espacio.
+export const CABANA_PHOTOS: Photo[] = [
+  { src: "/fotos/cabana_frontal.avif", alt: "Frontal de la Cabaña", aspect: "landscape" },
+  { src: "/cabana/cuarto_cabana_horizontal.avif", alt: "Habitación de la Cabaña", aspect: "landscape" },
+  { src: "/cabana/cocina_cabana_vertical.avif", alt: "Cocina de la Cabaña", aspect: "portrait" },
+  { src: "/cabana/cabana_bano.avif", alt: "Baño de la Cabaña", aspect: "landscape" },
+  { src: "/cabana/jardin_cabana_vertical.avif", alt: "Jardín de la Cabaña", aspect: "portrait" },
+  { src: "/cabana/cabana_vista_casa.avif", alt: "Vista de la Cabaña hacia la casa", aspect: "landscape" },
+  { src: "/fotos/cabana_noche.avif", alt: "Cabaña iluminada de noche", aspect: "landscape" },
+];
+
+// Eventos — khalessi_2 es la portada/hero
+export const EVENT_PHOTOS: Photo[] = [
+  { src: "/fotos/evento_khalessi_2.avif", alt: "Celebración en el valle", aspect: "landscape" },
+  { src: "/fotos/evento_khalessi_3.avif", alt: "Montaje de evento", aspect: "landscape" },
+  { src: "/fotos/evento_khalessi_4.avif", alt: "Invitados en el evento", aspect: "landscape" },
+  { src: "/fotos/evento_khalessi.avif", alt: "Evento al atardecer", aspect: "landscape" },
+  { src: "/fotos/evento_1.avif", alt: "Evento al aire libre", aspect: "landscape" },
+  { src: "/fotos/evento_2.avif", alt: "Celebración con invitados", aspect: "landscape" },
+  { src: "/fotos/evento_3.avif", alt: "Espacio de eventos", aspect: "landscape" },
+];
+
+// Portada de eventos (hero)
+export const EVENT_HERO: Photo = EVENT_PHOTOS[0];
