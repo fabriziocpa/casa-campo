@@ -16,10 +16,14 @@ function groupModalities(modalities: PricingModality[]): Group[] {
   const groups: Group[] = [];
 
   if (perNight.length > 0) {
+    const minN = Math.min(...perNight.map((m) => m.minNights));
     groups.push({
       key: "per_night",
       title: "Por noche",
-      subtitle: "Tarifa nocturna estándar",
+      subtitle:
+        minN > 1
+          ? `Mínimo ${minN} noches · ingreso 3pm, salida 12pm`
+          : "Tarifa nocturna estándar",
       rows: perNight,
     });
   }
@@ -43,7 +47,12 @@ function groupModalities(modalities: PricingModality[]): Group[] {
         tier === "none"
           ? "Paquete 2 días 1 noche"
           : `Paquete 2 días 1 noche · ${tier} personas`;
-      groups.push({ key: `full_${tier}`, title, rows });
+      groups.push({
+        key: `full_${tier}`,
+        title,
+        subtitle: "Horario full · ingreso 9am, salida 6pm del día siguiente",
+        rows,
+      });
     }
   }
 

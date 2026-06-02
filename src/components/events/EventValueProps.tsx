@@ -16,7 +16,7 @@ export function EventValueProps({
       <div className="mx-auto max-w-7xl px-6">
         <FadeIn>
           <p className="text-sm uppercase tracking-widest text-teal-deep mb-4">
-            Por qué Casa Grande
+            Por qué Casa Principal
           </p>
           <h2 className="text-4xl md:text-5xl font-semibold text-ink tracking-tight max-w-2xl">
             Un marco natural difícil de igualar

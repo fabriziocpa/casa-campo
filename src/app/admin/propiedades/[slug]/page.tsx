@@ -5,7 +5,7 @@ import { getPropertyBySlug } from "@/features/properties/queries";
 import { getRoomsByProperty } from "@/features/rooms/queries";
 import { getAmenitiesByProperty } from "@/features/amenities/queries";
 import { getRulesByProperty } from "@/features/rules/queries";
-import { getActiveModalitiesByProperty } from "@/features/pricing/queries";
+import { getAllModalitiesByProperty } from "@/features/pricing/queries";
 import { getEventPackagesByProperty } from "@/features/event-packages/queries";
 import {
   createRule,
@@ -13,6 +13,10 @@ import {
   toggleRuleActive,
   updateRule,
 } from "@/features/rules/adminActions";
+import {
+  toggleModalityActive,
+  updateModality,
+} from "@/features/pricing/adminActions";
 import { formatPEN } from "@/lib/money";
 import { labelForMask } from "@/features/pricing/dayMask";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +37,7 @@ export default async function PropertyDetailPage({
     getRoomsByProperty(property.id),
     getAmenitiesByProperty(property.id),
     getRulesByProperty(property.id),
-    getActiveModalitiesByProperty(property.id),
+    getAllModalitiesByProperty(property.id),
     getEventPackagesByProperty(property.id),
   ]);
 
@@ -78,21 +82,65 @@ export default async function PropertyDetailPage({
       >
         <ul className="divide-y divide-line/50">
           {modalities.map((m) => (
-            <li
-              key={m.id}
-              className="flex flex-wrap items-baseline justify-between gap-3 py-3"
-            >
-              <div>
-                <p className="text-sm font-medium text-ink">{m.name}</p>
-                <p className="text-xs text-ink/60 mt-0.5">
-                  {labelForMask(m.dayMask)} ·{" "}
-                  {m.kind === "per_night" ? "por noche" : "paquete"}
-                  {m.capacityTier && ` · hasta ${m.capacityTier} personas`}
-                </p>
-              </div>
-              <p className="tabular-nums font-medium text-teal-deep">
-                {formatPEN(m.priceCents)}
-              </p>
+            <li key={m.id} className="py-3">
+              <form
+                action={updateModality}
+                className="grid gap-2 sm:grid-cols-[1fr_120px_90px_auto] sm:items-center"
+              >
+                <input type="hidden" name="id" value={m.id} />
+                <div className={m.active ? "" : "opacity-50"}>
+                  <p className="text-sm font-medium text-ink">{m.name}</p>
+                  <p className="text-xs text-ink/60 mt-0.5">
+                    {labelForMask(m.dayMask)} ·{" "}
+                    {m.kind === "per_night" ? "por noche" : "paquete"}
+                    {m.capacityTier && ` · hasta ${m.capacityTier} personas`}
+                  </p>
+                </div>
+                <label className="flex items-center gap-1 text-xs text-ink/60">
+                  <span className="text-ink/40">S/</span>
+                  <Input
+                    name="price"
+                    type="number"
+                    step="1"
+                    min="0"
+                    defaultValue={(m.priceCents / 100).toString()}
+                    className="bg-bg text-sm tabular-nums"
+                  />
+                </label>
+                <label
+                  className="flex items-center gap-1 text-xs text-ink/50"
+                  title="Noches mínimas"
+                >
+                  min
+                  <Input
+                    name="minNights"
+                    type="number"
+                    min="1"
+                    defaultValue={m.minNights}
+                    className="bg-bg text-xs tabular-nums"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  className="rounded-full bg-teal-soft text-teal-deep px-3 py-1.5 text-xs font-medium hover:bg-teal-soft/70 transition-colors"
+                >
+                  Guardar
+                </button>
+              </form>
+              <form action={toggleModalityActive} className="mt-2">
+                <input type="hidden" name="id" value={m.id} />
+                <input type="hidden" name="active" value={String(m.active)} />
+                <button
+                  type="submit"
+                  className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-wider transition-colors ${
+                    m.active
+                      ? "bg-teal-deep/10 text-teal-deep hover:bg-teal-deep/20"
+                      : "bg-line/30 text-ink/60 hover:bg-line/50"
+                  }`}
+                >
+                  {m.active ? "Activa" : "Inactiva"}
+                </button>
+              </form>
             </li>
           ))}
         </ul>

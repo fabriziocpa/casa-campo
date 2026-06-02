@@ -4,7 +4,7 @@ import type { Property } from "@/db/seed";
 
 const NARRATIVE_IMAGE_BY_SLUG: Record<string, { src: string; alt: string }> = {
   chalet: { src: "/chalet/terraza.avif", alt: "Chalet en el valle" },
-  "casa-grande": { src: "/fotos/casa_grande.avif", alt: "Casa Grande al atardecer" },
+  "casa-grande": { src: "/fotos/casa_grande.avif", alt: "Casa Principal al atardecer" },
 };
 
 export function PropertyNarrative({ property }: { property: Property }) {

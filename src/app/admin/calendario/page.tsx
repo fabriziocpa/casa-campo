@@ -5,6 +5,13 @@ import { ExternalLink, Trash2 } from "lucide-react";
 import { getActiveProperties } from "@/features/properties/queries";
 import { listUpcomingBlocks } from "@/features/blocked-dates/dbQueries";
 import { removeManualBlock } from "@/features/blocked-dates/adminActions";
+import { getAllModalitiesByProperty } from "@/features/pricing/queries";
+import {
+  deleteOverride,
+  listUpcomingOverrides,
+} from "@/features/pricing/adminActions";
+import { OverrideForm } from "@/components/admin/OverrideForm";
+import { formatPEN } from "@/lib/money";
 import {
   CalendarBlockGrid,
   type BlockEntry,
@@ -38,7 +45,12 @@ export default async function CalendarioAdminPage({
   const selected =
     properties.find((p) => p.id === sp.propertyId) ?? properties[0];
   const today = format(new Date(), "yyyy-MM-dd");
-  const blocks = await listUpcomingBlocks(selected.id, today);
+  const [blocks, modalities, overrides] = await Promise.all([
+    listUpcomingBlocks(selected.id, today),
+    getAllModalitiesByProperty(selected.id),
+    listUpcomingOverrides(selected.id, today),
+  ]);
+  const modalityName = new Map(modalities.map((m) => [m.id, m.name]));
 
   const blockEntries: BlockEntry[] = blocks.map((b) => ({
     date: b.date,
@@ -154,6 +166,71 @@ export default async function CalendarioAdminPage({
             })}
           </ul>
         )}
+      </section>
+
+      <section className="rounded-xl border border-line/60 bg-bg p-6 space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold text-ink">Precios especiales</h2>
+          <p className="mt-1 text-sm text-ink/60">
+            Define un precio fijo o un ajuste porcentual para un rango de fechas
+            (feriados, temporada alta). El porcentaje se redondea al sol.
+          </p>
+        </div>
+
+        <OverrideForm
+          propertyId={selected.id}
+          modalities={modalities.map((m) => ({ id: m.id, name: m.name }))}
+        />
+
+        <div className="border-t border-line/60 pt-6">
+          <h3 className="text-sm uppercase tracking-wider text-ink/55">
+            Vigentes{" "}
+            <span className="text-ink/40 font-normal">({overrides.length})</span>
+          </h3>
+          {overrides.length === 0 ? (
+            <p className="mt-4 text-sm text-ink/60">
+              No hay precios especiales para esta propiedad.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-line/60">
+              {overrides.map((o) => (
+                <li
+                  key={o.id}
+                  className="flex items-center justify-between gap-4 py-3 text-sm"
+                >
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="font-medium text-ink">{o.name}</span>
+                    <span className="text-xs text-ink/60">
+                      {format(parseISO(o.startDate), "d MMM", { locale: es })} –{" "}
+                      {format(parseISO(o.endDate), "d MMM yyyy", { locale: es })}
+                      {" · "}
+                      {o.modalityId
+                        ? (modalityName.get(o.modalityId) ?? "tarifa")
+                        : "todas las tarifas"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="tabular-nums font-medium text-teal-deep">
+                      {o.adjustType === "percent"
+                        ? `${o.percent! > 0 ? "+" : ""}${o.percent}%`
+                        : formatPEN(o.priceCents)}
+                    </span>
+                    <form action={deleteOverride}>
+                      <input type="hidden" name="id" value={o.id} />
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-line/60 px-3 py-1.5 text-xs text-ink/75 hover:bg-rose-muted/10 hover:text-rose-muted"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Quitar
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
     </div>
   );

@@ -12,6 +12,8 @@ import { getFaqs, getSettings } from "@/features/content/queries";
 import { PropertyHero } from "@/components/property/PropertyHero";
 import { PropertyNarrative } from "@/components/property/PropertyNarrative";
 import { RoomGrid } from "@/components/property/RoomGrid";
+import { PropertyGallery } from "@/components/property/PropertyGallery";
+import { CabanaSection } from "@/components/property/CabanaSection";
 import { AmenityGrid } from "@/components/property/AmenityGrid";
 import { PricingTable } from "@/components/property/PricingTable";
 import { RulesGrid } from "@/components/property/RulesGrid";
@@ -63,6 +65,8 @@ export default async function PropertyPage({
       <PropertyHero property={property} />
       <PropertyNarrative property={property} />
       <RoomGrid rooms={rooms} />
+      <PropertyGallery slug={property.slug} />
+      {property.slug === "casa-grande" && <CabanaSection />}
       <AmenityGrid amenities={amenities} />
       <PricingTable modalities={modalities} />
       <EventsTeaser property={property} />
