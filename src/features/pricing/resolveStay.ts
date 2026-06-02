@@ -18,9 +18,21 @@ type Override = {
   modalityId: string | null;
   startDate: string;
   endDate: string;
+  adjustType: "absolute" | "percent";
   priceCents: number;
+  percent: number | null;
   minNights: number | null;
 };
+
+// Effective override price for a given base modality price.
+// "percent" rounds to the nearest whole sol so displayed prices stay .00.
+function overridePrice(override: Override, baseCents: number): number {
+  if (override.adjustType === "percent") {
+    const pct = override.percent ?? 0;
+    return Math.round((baseCents * (1 + pct / 100)) / 100) * 100;
+  }
+  return override.priceCents;
+}
 
 type Property = {
   baseCapacity: number;
@@ -80,7 +92,10 @@ export function resolveStay(args: {
     if (!maskHas(m.dayMask, checkInDow)) return false;
     if (m.capacityTier !== null && m.capacityTier < guests) return false;
     if (m.kind === "full_package") return nights === m.packageNights;
-    return true;
+    // per_night: only a candidate once the stay meets its minimum. This is what
+    // lets per_night and full_package coexist without colliding — a 1-night stay
+    // falls through to the package, a 2+ night stay uses the per_night rate.
+    return nights >= m.minNights;
   });
 
   if (candidates.length === 0) {
@@ -108,7 +123,7 @@ export function resolveStay(args: {
         (o.modalityId === null || o.modalityId === modality.id) &&
         inRange(checkInStr, o.startDate, o.endDate)
     );
-    subtotalCents = override?.priceCents ?? modality.priceCents;
+    subtotalCents = override ? overridePrice(override, modality.priceCents) : modality.priceCents;
     if (override?.minNights) minNightsRequired = Math.max(minNightsRequired, override.minNights);
     breakdown = { kind: "full_package", cents: subtotalCents };
   } else {
@@ -122,7 +137,7 @@ export function resolveStay(args: {
           (o.modalityId === null || o.modalityId === modality.id) &&
           inRange(dayStr, o.startDate, o.endDate)
       );
-      const cents = override?.priceCents ?? modality.priceCents;
+      const cents = override ? overridePrice(override, modality.priceCents) : modality.priceCents;
       if (override?.minNights) minNightsRequired = Math.max(minNightsRequired, override.minNights);
       perNight.push({ date: dayStr, cents });
       subtotalCents += cents;

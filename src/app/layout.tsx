@@ -13,10 +13,13 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: {
     template: "%s",
-    default: "CasaCampo — Refugios en el valle",
+    default: "Casa Campo",
   },
-  description: "Refugios rurales en el valle del río Moche, La Libertad. Alquiler de casas de campo para escapar de la ciudad.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  description:
+    "Refugios rurales en el valle del río Moche, La Libertad. Alquiler de casas de campo para escapar de la ciudad.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
 };
 
 export default function RootLayout({
@@ -24,7 +27,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className={`${poppins.variable} antialiased`}>
-      <body className="min-h-screen flex flex-col" suppressHydrationWarning>{children}</body>
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

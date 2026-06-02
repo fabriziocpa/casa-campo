@@ -2,7 +2,7 @@ export type Photo = { src: string; alt: string; aspect?: "landscape" | "portrait
 
 // Marca / inicio / galería "Momentos"
 export const BRAND_PHOTOS: Photo[] = [
-  { src: "/fotos/casa_grande.avif", alt: "Casa Grande al atardecer", aspect: "landscape" },
+  { src: "/fotos/casa_grande.avif", alt: "Casa Principal al atardecer", aspect: "landscape" },
   { src: "/fotos/cabana_frontal.avif", alt: "Frontal de la Cabaña", aspect: "landscape" },
   { src: "/fotos/cabana_noche.avif", alt: "Cabaña iluminada de noche", aspect: "landscape" },
   { src: "/fotos/chalet.avif", alt: "Chalet en el valle", aspect: "landscape" },
@@ -14,7 +14,7 @@ export const BRAND_PHOTOS: Photo[] = [
 // Fotos por propiedad — SOLO la casa (la Cabaña va aparte, ver CABANA_PHOTOS)
 export const PROPERTY_PHOTOS: Record<string, Photo[]> = {
   "casa-grande": [
-    { src: "/fotos/casa_grande.avif", alt: "Casa Grande al atardecer", aspect: "landscape" },
+    { src: "/fotos/casa_grande.avif", alt: "Casa Principal al atardecer", aspect: "landscape" },
     { src: "/casa grande/sala_horizontal.avif", alt: "Sala principal", aspect: "landscape" },
     { src: "/casa grande/vista_piscina_horizontal.avif", alt: "Vista a la piscina", aspect: "landscape" },
     { src: "/casa grande/comedor_vertical.avif", alt: "Comedor", aspect: "portrait" },
@@ -37,7 +37,7 @@ export const PROPERTY_PHOTOS: Record<string, Photo[]> = {
   ],
 };
 
-// La Cabaña — espacio aparte dentro de Casa Grande, exclusivo para grupos 12+ (tarifa 16).
+// La Cabaña — espacio aparte dentro de Casa Principal, exclusivo para grupos 12+ (tarifa 16).
 // Frontal primero (cabana_frontal.avif) como portada del espacio.
 export const CABANA_PHOTOS: Photo[] = [
   { src: "/fotos/cabana_frontal.avif", alt: "Frontal de la Cabaña", aspect: "landscape" },

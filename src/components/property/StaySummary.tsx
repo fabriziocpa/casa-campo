@@ -54,7 +54,9 @@ export function StaySummary({
       modalityId: o.modalityId,
       startDate: o.startDate,
       endDate: o.endDate,
+      adjustType: o.adjustType,
       priceCents: o.priceCents,
+      percent: o.percent,
       minNights: o.minNights,
     })),
   });

@@ -3,7 +3,7 @@
 Booking + events web app for **CasaCampo** — two rural getaway properties in the Trujillo valley (La Libertad, Peru):
 
 - **Chalet** — small valley retreat (lodging only)
-- **Casa Grande** — large riverside house (lodging + events)
+- **Casa Principal** — large riverside house (lodging + events)
 
 New properties can be added from `/admin` without code changes — every property-owned entity carries `property_id`, and public routes are parameterised by `propertySlug`.
 

@@ -166,7 +166,7 @@ export default async function BrandLandingPage() {
                         <div className="relative aspect-[4/3] overflow-hidden rounded-xl ring-2 ring-bg/80 shadow-lg">
                           <Image
                             src="/fotos/cabana_frontal.avif"
-                            alt="La Cabaña, espacio adicional de Casa Grande"
+                            alt="La Cabaña, espacio adicional de Casa Principal"
                             fill
                             sizes="160px"
                             className="object-cover"

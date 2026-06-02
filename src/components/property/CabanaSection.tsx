@@ -27,7 +27,7 @@ export function CabanaSection() {
               La Cabaña
             </h2>
             <p className="mt-6 text-bg/85 leading-relaxed text-lg">
-              Una cabaña independiente dentro de Casa Grande, con su propia
+              Una cabaña independiente dentro de Casa Principal, con su propia
               cocina, jardín y baño. No viene incluida por defecto: se habilita
               como complemento exclusivo para grupos grandes.
             </p>

@@ -81,6 +81,12 @@ export function ReservationForm({
       ? [...packageNightsSet][0]
       : undefined;
 
+  // Mixed model (Casa Principal): per_night + full_package both active. The night
+  // count alone decides the rate, so we just explain it instead of forcing a mode.
+  const hasPerNight = activeModalities.some((m) => m.kind === "per_night");
+  const hasPackage = activeModalities.some((m) => m.kind === "full_package");
+  const mixedMode = hasPerNight && hasPackage;
+
   // Compute union of allowed check-in weekdays across modalities.
   const allowedCheckinDow: number[] = [];
   for (let d = 0; d < 7; d++) {
@@ -222,6 +228,15 @@ export function ReservationForm({
                     {fixedNights === 1 ? "noche" : "noches"}
                   </span>
                   . Elige el día de entrada y la salida se ajusta sola.
+                </p>
+              )}
+              {mixedMode && (
+                <p className="text-xs text-ink/60 mt-3">
+                  <span className="font-medium text-ink">1 noche</span> = horario
+                  full (ingreso 9am, salida 6pm del día siguiente).{" "}
+                  <span className="font-medium text-ink">2+ noches</span> = tarifa
+                  por noche (ingreso 3pm, salida 12pm). El precio se ajusta solo
+                  según las noches que elijas.
                 </p>
               )}
               {(errors.checkIn || errors.checkOut) && (

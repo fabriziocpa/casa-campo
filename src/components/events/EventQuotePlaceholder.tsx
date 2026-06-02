@@ -9,7 +9,7 @@ export function EventQuotePlaceholder({
 }) {
   const href = whatsappUrl(
     whatsapp,
-    "Hola CasaCampo, me gustaría una cotización para un evento en Casa Grande.",
+    "Hola CasaCampo, me gustaría una cotización para un evento en Casa Principal.",
   );
 
   return (

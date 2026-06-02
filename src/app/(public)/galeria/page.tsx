@@ -60,7 +60,7 @@ export default async function GaleriaPage() {
                   />
                   <FadeIn>
                     <p className="mt-14 text-sm font-medium uppercase tracking-wider text-ink/60">
-                      Casa Grande · Cabaña
+                      Casa Principal · Cabaña
                     </p>
                   </FadeIn>
                   <ClickableGallery
