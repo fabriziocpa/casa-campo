@@ -39,11 +39,11 @@ export function EventHero({ property }: { property: Property }) {
             Eventos · {property.shortName}
           </p>
           <h1 className="text-5xl md:text-7xl font-semibold text-bg tracking-tight max-w-3xl drop-shadow-sm">
-            Celebraciones con vista al río
+            Una celebración a la altura del momento
           </h1>
           <p className="mt-6 text-lg md:text-xl text-bg/85 max-w-2xl">
-            Bodas, cumpleaños, quinceañeros y eventos corporativos — la casa
-            entera reservada para tu momento.
+            Bodas, cumpleaños, quinceañeros y eventos corporativos — la finca
+            entera, reservada solo para ti, con el río como telón de fondo.
           </p>
         </FadeIn>
       </div>

@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -118,13 +124,16 @@ export function EventQuoteForm({
     }
   }, [serverState]);
 
-  async function onValid(data: FormOutput) {
+  function onValid(data: FormOutput) {
     const fd = new FormData();
     Object.entries(data).forEach(([k, v]) => {
       if (v === undefined || v === null) return;
       fd.set(k, String(v));
     });
-    formAction(fd);
+
+    startTransition(() => {
+      formAction(fd);
+    });
   }
 
   const eventType = watch("eventType");
@@ -141,11 +150,11 @@ export function EventQuoteForm({
             Cotización
           </p>
           <h2 className="text-4xl md:text-5xl font-semibold text-ink tracking-tight">
-            Cuéntanos sobre tu evento
+            Diseñemos tu evento juntos
           </h2>
           <p className="mt-4 text-ink/65 max-w-2xl">
             Te contactamos en menos de 24 horas para coordinar una reunión o
-            videollamada con todos los detalles. Sin compromiso.
+            videollamada y afinar cada detalle a tu medida. Sin compromiso.
           </p>
         </FadeIn>
 
@@ -244,9 +253,7 @@ export function EventQuoteForm({
                         <Users className="size-3" />
                         Hasta {p.maxGuests}
                       </span>
-                      {selected && (
-                        <Check className="size-4 text-teal-deep" />
-                      )}
+                      {selected && <Check className="size-4 text-teal-deep" />}
                     </div>
                     <p className="mt-3 text-base font-semibold text-ink">
                       {p.name}
@@ -269,8 +276,8 @@ export function EventQuoteForm({
             </div>
             <p className="mt-3 text-xs text-ink/55">
               Los paquetes que no alcanzan tu aforo aparecen deshabilitados.
-              Puedes enviar tu cotización sin seleccionar paquete y lo
-              afinamos en la conversación.
+              Puedes enviar tu cotización sin seleccionar paquete y lo afinamos
+              en la conversación.
             </p>
           </div>
 
@@ -372,9 +379,7 @@ export function EventQuoteForm({
             </span>
           </label>
           {errors.consent && (
-            <p className="text-xs text-rose-muted">
-              {errors.consent.message}
-            </p>
+            <p className="text-xs text-rose-muted">{errors.consent.message}</p>
           )}
 
           <input type="hidden" {...register("propertyId")} />

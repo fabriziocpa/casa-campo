@@ -25,11 +25,11 @@ const PROPERTIES = [
     slug: "chalet",
     name: "Chalet",
     short_name: "Chalet",
-    tagline: "Tu refugio en el valle",
+    tagline: "Tu refugio privado en el valle",
     description_short:
-      "Chalet en el corazón del valle, rodeado de naturaleza.",
+      "Un chalet íntimo en el corazón del valle, reservado solo para los tuyos.",
     description_long:
-      "Refugio en el valle para desconectar. Naturaleza, vistas a las montañas, espacio íntimo para grupos pequeños.",
+      "Un refugio íntimo para desconectar sin prisa. Naturaleza, vistas a las montañas y un espacio reservado solo para tu grupo.",
     address_line:
       "Km 23.5 Carretera a Simbal (antes del peaje). Sector Santa Rosa / Quirihuac",
     latitude: "-7.972500",
@@ -53,10 +53,11 @@ const PROPERTIES = [
     slug: "casa-grande",
     name: "Casa Principal",
     short_name: "Casa Principal",
-    tagline: "Donde la calma encuentra hogar",
-    description_short: "Casa de campo con acceso directo al río Moche.",
+    tagline: "Donde la calma se vuelve hogar",
+    description_short:
+      "Casa de campo con acceso privado al río Moche, pensada al detalle.",
     description_long:
-      "Casa de campo con acceso directo al río, piscina, diseño moderno de cabaña. Ideal para familias grandes y celebraciones.",
+      "Casa de campo con acceso privado al río, piscina y diseño cálido de cabaña. El espacio entero, reservado para tu familia o celebración.",
     address_line:
       "Quirihuac, valle del río Moche, La Libertad (a las afueras de Trujillo).",
     latitude: "-7.985000",
@@ -188,10 +189,10 @@ const RULES = [
 // Content (key-value). null property = brand-level.
 const CONTENT = [
   // Brand-level
-  ["e0000000-0000-0000-0000-000000000001", null, "brand.value.1.title", "Refugio en el valle"],
-  ["e0000000-0000-0000-0000-000000000002", null, "brand.value.1.body", "Naturaleza, silencio y aire limpio a 40 minutos de Trujillo."],
-  ["e0000000-0000-0000-0000-000000000003", null, "brand.value.2.title", "Diseño cálido"],
-  ["e0000000-0000-0000-0000-000000000004", null, "brand.value.2.body", "Espacios pensados para el descanso, la conversación y los amaneceres lentos."],
+  ["e0000000-0000-0000-0000-000000000001", null, "brand.value.1.title", "Un refugio solo tuyo"],
+  ["e0000000-0000-0000-0000-000000000002", null, "brand.value.1.body", "La propiedad entera, reservada para tu grupo. Naturaleza, silencio y aire limpio a 40 minutos de Trujillo."],
+  ["e0000000-0000-0000-0000-000000000003", null, "brand.value.2.title", "Cuidado en cada detalle"],
+  ["e0000000-0000-0000-0000-000000000004", null, "brand.value.2.body", "Espacios pensados al detalle para el descanso, la conversación y los amaneceres sin prisa."],
   ["e0000000-0000-0000-0000-000000000005", null, "brand.value.3.title", "Atención cercana"],
   ["e0000000-0000-0000-0000-000000000006", null, "brand.value.3.body", "Un equipo que conoce cada rincón del valle y responde por WhatsApp en minutos."],
 
@@ -259,7 +260,10 @@ try {
         ${p.base_capacity}, ${p.max_capacity}, ${p.extra_person_cents}, ${p.min_nights_default},
         ${p.pet_policy}, ${p.pet_policy_note}, ${p.events_enabled}, ${p.active}, ${p.order}
       )
-      on conflict (id) do nothing
+      on conflict (id) do update set
+        tagline = excluded.tagline,
+        description_short = excluded.description_short,
+        description_long = excluded.description_long
     `;
     console.log(`  property ${p.slug} ensured`);
   }
@@ -350,7 +354,7 @@ try {
     await sql`
       insert into content (id, property_id, key, value)
       values (${id}, ${propertyId}, ${key}, ${value})
-      on conflict (id) do nothing
+      on conflict (id) do update set value = excluded.value
     `;
   }
   console.log(`  ${CONTENT.length} content rows ensured`);

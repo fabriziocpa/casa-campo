@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { Resend } from "resend";
 import type { ReactElement } from "react";
 
@@ -6,6 +8,27 @@ function client(): Resend | null {
   if (!process.env.RESEND_API_KEY) return null;
   if (!cached) cached = new Resend(process.env.RESEND_API_KEY);
   return cached;
+}
+
+// Inline brand logo, embedded as a CID attachment so it renders in the email
+// body regardless of whether the public domain is live yet (an absolute <img>
+// URL would break before casacampo.pe is deployed). BrandShell references it
+// via `src="cid:brand-logo"`. Read once and cached.
+export const LOGO_CID = "brand-logo";
+let logoBase64: string | null = null;
+function logoAttachment() {
+  try {
+    if (logoBase64 === null) {
+      const p = path.join(process.cwd(), "public", "logo", "logo2.png");
+      logoBase64 = readFileSync(p).toString("base64");
+    }
+    return [
+      { filename: "logo2.png", content: logoBase64, contentId: LOGO_CID },
+    ];
+  } catch (err) {
+    console.error("[email] logo attachment failed:", err);
+    return undefined;
+  }
 }
 
 export type SendArgs = {
@@ -34,7 +57,13 @@ export async function send({ to, subject, react }: SendArgs): Promise<void> {
     return;
   }
 
-  const { error } = await resend.emails.send({ from, to, subject, react });
+  const { error } = await resend.emails.send({
+    from,
+    to,
+    subject,
+    react,
+    attachments: logoAttachment(),
+  });
   if (error) {
     console.error("[email] send error:", error);
   }
