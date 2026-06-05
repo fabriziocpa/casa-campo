@@ -14,10 +14,9 @@ import {
 import { formatPEN } from "@/lib/money";
 import {
   confirmReservation,
-  rejectReservation,
-  cancelReservation,
   bulkConfirmReservations,
   bulkRejectReservations,
+  bulkCancelReservations,
   bulkDeleteReservations,
 } from "@/features/reservations/adminActions";
 import {
@@ -52,43 +51,53 @@ const STATUS_LABEL: Record<Status, string> = {
   cancelled: "Cancelada",
 };
 
-type BulkMode = "confirm" | "reject" | "delete";
+type BulkMode = "confirm" | "reject" | "cancel" | "delete";
 
 type ResultBanner = { ok: boolean; message: string } | null;
+
+// Eligibility of a set of rows for each action. Mirrors the server-side gates:
+// reject only on "sin confirmar" (pending), cancel only on confirmed, delete
+// on anything that isn't confirmed (confirmed must be cancelled first).
+function eligibility(rs: ReservaRow[]) {
+  return {
+    confirmable: rs.filter((r) => r.status === "pending").map((r) => r.id),
+    rejectable: rs.filter((r) => r.status === "pending").map((r) => r.id),
+    cancellable: rs.filter((r) => r.status === "confirmed").map((r) => r.id),
+    deletable: rs.filter((r) => r.status !== "confirmed").map((r) => r.id),
+  };
+}
 
 export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [mode, setMode] = useState<BulkMode | null>(null);
+  // When set, the open dialog targets just this row (single-row action) instead
+  // of the multi-selection — so single-row actions don't clobber a selection.
+  const [single, setSingle] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [banner, setBanner] = useState<ResultBanner>(null);
   const [pending, startTransition] = useTransition();
   const selectAllRef = useRef<HTMLInputElement>(null);
 
-  // Drop selections for rows no longer present after a refresh.
-  useEffect(() => {
-    setSelected((prev) => {
-      const ids = new Set(rows.map((r) => r.id));
-      const next = new Set([...prev].filter((id) => ids.has(id)));
-      return next.size === prev.size ? prev : next;
-    });
-  }, [rows]);
-
+  // Selection is derived from the current rows at render time: any id that no
+  // longer matches a row (e.g. removed after a refresh) is simply ignored, so
+  // there's no need to prune the underlying set in an effect.
   const selectedRows = useMemo(
     () => rows.filter((r) => selected.has(r.id)),
     [rows, selected],
   );
+  const selectedCount = selectedRows.length;
 
-  const confirmableIds = selectedRows
-    .filter((r) => r.status === "pending")
-    .map((r) => r.id);
-  const rejectableIds = selectedRows
-    .filter((r) => r.status !== "rejected" && r.status !== "cancelled")
-    .map((r) => r.id);
-  const deletableIds = selectedRows.map((r) => r.id);
+  // Counts shown on the bulk bar come from the multi-selection.
+  const barEligible = eligibility(selectedRows);
 
-  const allChecked = rows.length > 0 && selected.size === rows.length;
-  const someChecked = selected.size > 0 && !allChecked;
+  // The dialog and the action run against the target rows: a single row when a
+  // single-row action opened it, otherwise the whole selection.
+  const targetRows = single ? rows.filter((r) => r.id === single) : selectedRows;
+  const target = eligibility(targetRows);
+
+  const allChecked = rows.length > 0 && selectedCount === rows.length;
+  const someChecked = selectedCount > 0 && !allChecked;
 
   useEffect(() => {
     if (selectAllRef.current) selectAllRef.current.indeterminate = someChecked;
@@ -104,9 +113,24 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
   }
 
   function toggleAll() {
-    setSelected((prev) =>
-      prev.size === rows.length ? new Set() : new Set(rows.map((r) => r.id)),
+    setSelected(
+      selectedCount === rows.length ? new Set() : new Set(rows.map((r) => r.id)),
     );
+  }
+
+  function openBulk(m: BulkMode) {
+    setSingle(null);
+    setMode(m);
+  }
+
+  function openSingle(id: string, m: BulkMode) {
+    setSingle(id);
+    setMode(m);
+  }
+
+  function closeDialog() {
+    setMode(null);
+    setSingle(null);
   }
 
   function runBulk() {
@@ -114,7 +138,7 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
     startTransition(async () => {
       try {
         if (mode === "confirm") {
-          const r = await bulkConfirmReservations(confirmableIds);
+          const r = await bulkConfirmReservations(target.confirmable);
           const parts: string[] = [];
           if (r.confirmed) parts.push(`${r.confirmed} confirmada(s)`);
           if (r.conflicts.length) {
@@ -129,19 +153,22 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
             message: parts.join(". ") || "Nada que confirmar.",
           });
         } else if (mode === "reject") {
-          const r = await bulkRejectReservations(rejectableIds, notes.trim());
+          const r = await bulkRejectReservations(target.rejectable, notes.trim());
           setBanner({ ok: true, message: `${r.rejected} reserva(s) rechazada(s).` });
+        } else if (mode === "cancel") {
+          const r = await bulkCancelReservations(target.cancellable, notes.trim());
+          setBanner({ ok: true, message: `${r.cancelled} reserva(s) cancelada(s).` });
         } else {
-          const r = await bulkDeleteReservations(deletableIds);
+          const r = await bulkDeleteReservations(target.deletable);
           setBanner({ ok: true, message: `${r.deleted} reserva(s) eliminada(s).` });
         }
-        setSelected(new Set());
+        if (!single) setSelected(new Set());
         setNotes("");
-        setMode(null);
+        closeDialog();
         router.refresh();
       } catch {
         setBanner({ ok: false, message: "Ocurrió un error. Reintenta." });
-        setMode(null);
+        closeDialog();
       }
     });
   }
@@ -155,22 +182,30 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
       description:
         "Se confirmarán las reservas pendientes seleccionadas y se enviará el correo de confirmación. Las que tengan conflicto de fechas se omiten.",
       cta: "Confirmar",
-      count: confirmableIds.length,
+      count: target.confirmable.length,
     },
     reject: {
       title: "Rechazar en conjunto",
       description:
         "Se marcarán como rechazadas y se liberarán sus fechas. Se enviará el correo de rechazo a cada huésped.",
       cta: "Rechazar",
-      count: rejectableIds.length,
+      count: target.rejectable.length,
+    },
+    cancel: {
+      title: "Cancelar reservas confirmadas",
+      description:
+        "Se marcarán como canceladas y se liberarán sus fechas bloqueadas. No se envía correo al huésped.",
+      cta: "Cancelar reservas",
+      danger: true,
+      count: target.cancellable.length,
     },
     delete: {
       title: "Eliminar en conjunto",
       description:
-        "Se eliminarán permanentemente las reservas seleccionadas y sus fechas bloqueadas. Esta acción no se puede deshacer.",
+        "Se eliminarán permanentemente las reservas seleccionadas y sus fechas bloqueadas. Las confirmadas deben cancelarse primero. Esta acción no se puede deshacer.",
       cta: "Eliminar",
       danger: true,
-      count: deletableIds.length,
+      count: target.deletable.length,
     },
   };
 
@@ -200,32 +235,39 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
         </div>
       )}
 
-      {selected.size > 0 && (
+      {selectedCount > 0 && (
         <div className="sticky top-2 z-10 flex flex-wrap items-center gap-3 rounded-xl border border-teal-deep/30 bg-bg px-4 py-3 shadow-sm">
           <span className="text-sm font-medium text-ink">
-            {selected.size} seleccionada{selected.size === 1 ? "" : "s"}
+            {selectedCount} seleccionada{selectedCount === 1 ? "" : "s"}
           </span>
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => setMode("confirm")}
-              disabled={confirmableIds.length === 0 || pending}
+              onClick={() => openBulk("confirm")}
+              disabled={barEligible.confirmable.length === 0 || pending}
               className="rounded-full bg-teal-deep text-bg px-3 py-1 text-xs font-medium hover:bg-teal disabled:opacity-40 transition-colors"
             >
-              Confirmar ({confirmableIds.length})
+              Confirmar ({barEligible.confirmable.length})
             </button>
             <button
-              onClick={() => setMode("reject")}
-              disabled={rejectableIds.length === 0 || pending}
+              onClick={() => openBulk("reject")}
+              disabled={barEligible.rejectable.length === 0 || pending}
               className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted disabled:opacity-40 transition-colors"
             >
-              Rechazar ({rejectableIds.length})
+              Rechazar ({barEligible.rejectable.length})
             </button>
             <button
-              onClick={() => setMode("delete")}
-              disabled={deletableIds.length === 0 || pending}
+              onClick={() => openBulk("cancel")}
+              disabled={barEligible.cancellable.length === 0 || pending}
+              className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted disabled:opacity-40 transition-colors"
+            >
+              Cancelar ({barEligible.cancellable.length})
+            </button>
+            <button
+              onClick={() => openBulk("delete")}
+              disabled={barEligible.deletable.length === 0 || pending}
               className="inline-flex items-center gap-1 rounded-full border border-rose-muted/60 text-rose-muted px-3 py-1 text-xs hover:bg-rose-muted/10 disabled:opacity-40 transition-colors"
             >
-              <Trash2 className="size-3" /> Eliminar ({deletableIds.length})
+              <Trash2 className="size-3" /> Eliminar ({barEligible.deletable.length})
             </button>
           </div>
           <button
@@ -311,29 +353,33 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
                             Confirmar
                           </button>
                         </form>
-                        <form action={rejectReservation}>
-                          <input type="hidden" name="id" value={r.id} />
-                          <button
-                            type="submit"
-                            className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
-                            title="Rechazar"
-                          >
-                            Rechazar
-                          </button>
-                        </form>
+                        <button
+                          onClick={() => openSingle(r.id, "reject")}
+                          className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
+                          title="Rechazar"
+                        >
+                          Rechazar
+                        </button>
                       </>
                     )}
                     {r.status === "confirmed" && (
-                      <form action={cancelReservation}>
-                        <input type="hidden" name="id" value={r.id} />
-                        <button
-                          type="submit"
-                          className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
-                          title="Cancelar (libera fechas)"
-                        >
-                          Cancelar
-                        </button>
-                      </form>
+                      <button
+                        onClick={() => openSingle(r.id, "cancel")}
+                        className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
+                        title="Cancelar (libera fechas)"
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                    {r.status !== "confirmed" && (
+                      <button
+                        onClick={() => openSingle(r.id, "delete")}
+                        className="inline-flex items-center rounded-full border border-rose-muted/60 text-rose-muted p-1.5 hover:bg-rose-muted/10 transition-colors"
+                        title="Eliminar"
+                        aria-label="Eliminar reserva"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
                     )}
                     <Link
                       href={`/admin/reservas/${r.id}`}
@@ -350,7 +396,7 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
         </table>
       </div>
 
-      <Dialog open={mode !== null} onOpenChange={(o) => !o && setMode(null)}>
+      <Dialog open={mode !== null} onOpenChange={(o) => !o && closeDialog()}>
         <DialogContent>
           {mode && (
             <>
@@ -363,24 +409,29 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
                 </DialogDescription>
               </DialogHeader>
 
-              {mode === "reject" && modalCopy.reject.count > 0 && (
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-ink/55">
-                    Motivo (opcional)
-                  </label>
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={3}
-                    className="mt-1 bg-bg"
-                    placeholder="Se incluye en el correo al huésped"
-                  />
-                </div>
-              )}
+              {(mode === "reject" || mode === "cancel") &&
+                modalCopy[mode].count > 0 && (
+                  <div>
+                    <label className="text-xs uppercase tracking-wider text-ink/55">
+                      Motivo (opcional)
+                    </label>
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      rows={3}
+                      className="mt-1 bg-bg"
+                      placeholder={
+                        mode === "reject"
+                          ? "Se incluye en el correo al huésped"
+                          : "Nota interna (no se envía correo)"
+                      }
+                    />
+                  </div>
+                )}
 
               <DialogFooter>
                 <button
-                  onClick={() => setMode(null)}
+                  onClick={closeDialog}
                   disabled={pending}
                   className="rounded-full border border-line/60 px-4 py-1.5 text-sm text-ink/70 hover:border-ink/40 transition-colors"
                 >

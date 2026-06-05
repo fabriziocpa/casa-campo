@@ -227,9 +227,40 @@ async function rejectCore(id: string, notes?: string): Promise<boolean> {
   return true;
 }
 
-// Permanently delete a reservation. Linked blocked_dates rows cascade away via
-// the FK; falls back to splicing the mock seed for demo rows.
+// Cancel a single confirmed reservation without redirecting. Frees its held
+// nights. No email — cancellation is internal admin cleanup; an optional motivo
+// is stored as adminNotes.
+async function cancelCore(id: string, notes?: string): Promise<boolean> {
+  const reservation = await getReservationById(id);
+  if (!reservation) return false;
+  if (reservation.status !== "confirmed") return false;
+
+  const result = await updateStatus(id, "cancelled", notes);
+  if (!result.ok) return false;
+
+  try {
+    await db
+      .delete(blockedDates)
+      .where(
+        and(
+          eq(blockedDates.reservationId, id),
+          eq(blockedDates.reason, "reservation"),
+        ),
+      );
+  } catch (err) {
+    console.error("[reservations:adminActions] free blocks on cancel failed:", err);
+  }
+  return true;
+}
+
+// Permanently delete a reservation. Gated: a confirmed reservation can NOT be
+// deleted — it must be cancelled first (which frees its nights). Linked
+// blocked_dates rows cascade away via the FK; falls back to splicing the mock
+// seed for demo rows.
 async function deleteCore(id: string): Promise<boolean> {
+  const reservation = await getReservationById(id);
+  if (reservation && reservation.status === "confirmed") return false;
+
   try {
     const deleted = await db
       .delete(reservations)
@@ -332,26 +363,24 @@ export async function bulkDeleteReservations(
   return { deleted };
 }
 
+export async function bulkCancelReservations(
+  ids: string[],
+  notes?: string,
+): Promise<{ cancelled: number }> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  let cancelled = 0;
+  for (const id of unique) {
+    if (await cancelCore(id, notes)) cancelled++;
+  }
+  revalidate("");
+  return { cancelled };
+}
+
 export async function cancelReservation(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   if (!id) return;
-
-  await updateStatus(id, "cancelled", notes);
-
-  try {
-    await db
-      .delete(blockedDates)
-      .where(
-        and(
-          eq(blockedDates.reservationId, id),
-          eq(blockedDates.reason, "reservation"),
-        ),
-      );
-  } catch (err) {
-    console.error("[reservations:adminActions] free blocks on cancel failed:", err);
-  }
-
+  await cancelCore(id, notes);
   revalidate(id);
 }
 

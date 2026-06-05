@@ -7,11 +7,12 @@ import { getReservationById } from "@/features/reservations/queries";
 import { getPropertyBySlug } from "@/features/properties/queries";
 import { getActiveProperties } from "@/features/properties/queries";
 import { formatPEN } from "@/lib/money";
-import { Textarea } from "@/components/ui/textarea";
+import { DetailDangerZone } from "@/components/admin/DetailDangerZone";
 import {
   confirmReservation,
-  rejectReservation,
-  cancelReservation,
+  bulkRejectReservations,
+  bulkCancelReservations,
+  bulkDeleteReservations,
 } from "@/features/reservations/adminActions";
 
 export const metadata = { title: "Reserva" };
@@ -149,55 +150,34 @@ export default async function ReservaDetailPage({
       )}
 
       {reservation.status === "pending" && (
-        <Panel title="Acciones">
-          <div className="flex flex-wrap gap-6">
-            <form action={confirmReservation}>
-              <input type="hidden" name="id" value={reservation.id} />
-              <button
-                type="submit"
-                className="rounded-full bg-teal-deep text-bg px-5 py-2 text-sm font-medium hover:bg-teal transition-colors"
-              >
-                Confirmar
-              </button>
-            </form>
-            <form action={rejectReservation} className="flex flex-col gap-2 w-full max-w-md">
-              <input type="hidden" name="id" value={reservation.id} />
-              <Textarea
-                name="notes"
-                placeholder="Motivo del rechazo (opcional)"
-                rows={3}
-                className="bg-bg"
-              />
-              <button
-                type="submit"
-                className="self-start rounded-full border border-line/60 px-5 py-2 text-sm text-ink/75 hover:border-rose-muted hover:text-rose-muted transition-colors"
-              >
-                Rechazar
-              </button>
-            </form>
-          </div>
+        <Panel title="Confirmar">
+          <form action={confirmReservation}>
+            <input type="hidden" name="id" value={reservation.id} />
+            <button
+              type="submit"
+              className="rounded-full bg-teal-deep text-bg px-5 py-2 text-sm font-medium hover:bg-teal transition-colors"
+            >
+              Confirmar
+            </button>
+          </form>
+          <p className="mt-3 text-xs text-ink/55">
+            Al confirmar se verifica que no haya conflictos de fechas y se
+            notifica al huésped.
+          </p>
         </Panel>
       )}
 
-      {reservation.status === "confirmed" && (
-        <Panel title="Acciones">
-          <form action={cancelReservation} className="flex flex-col gap-2 w-full max-w-md">
-            <input type="hidden" name="id" value={reservation.id} />
-            <Textarea
-              name="notes"
-              placeholder="Motivo de la cancelación"
-              rows={3}
-              className="bg-bg"
-            />
-            <button
-              type="submit"
-              className="self-start rounded-full border border-line/60 px-5 py-2 text-sm text-ink/75 hover:border-rose-muted hover:text-rose-muted transition-colors"
-            >
-              Cancelar reserva
-            </button>
-          </form>
-        </Panel>
-      )}
+      <Panel title="Otras acciones">
+        <DetailDangerZone
+          id={reservation.id}
+          status={reservation.status}
+          listHref="/admin/reservas"
+          recipient="huésped"
+          onReject={bulkRejectReservations}
+          onCancel={bulkCancelReservations}
+          onDelete={bulkDeleteReservations}
+        />
+      </Panel>
 
       {propertyPage && (
         <p className="text-xs text-ink/50">
