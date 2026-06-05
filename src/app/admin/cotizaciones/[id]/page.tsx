@@ -7,11 +7,12 @@ import { getEventQuoteById } from "@/features/event-quotes/queries";
 import { getActiveProperties } from "@/features/properties/queries";
 import { getEventPackagesByProperty } from "@/features/event-packages/queries";
 import { formatPEN } from "@/lib/money";
-import { Textarea } from "@/components/ui/textarea";
+import { DetailDangerZone } from "@/components/admin/DetailDangerZone";
 import {
   confirmEventQuote,
-  rejectEventQuote,
-  cancelEventQuote,
+  bulkRejectEventQuotes,
+  bulkCancelEventQuotes,
+  bulkDeleteEventQuotes,
 } from "@/features/event-quotes/adminActions";
 
 export const metadata = { title: "Cotización" };
@@ -232,47 +233,17 @@ export default async function CotizacionDetailPage({
         </Panel>
       )}
 
-      {quote.status !== "rejected" && quote.status !== "cancelled" && (
-        <Panel title="Otras acciones">
-          <div className="flex flex-wrap gap-6">
-            <form action={rejectEventQuote} className="flex flex-col gap-2 w-full max-w-md">
-              <input type="hidden" name="id" value={quote.id} />
-              <Textarea
-                name="notes"
-                placeholder="Motivo del rechazo (opcional)"
-                rows={3}
-                className="bg-bg"
-              />
-              <button
-                type="submit"
-                className="self-start rounded-full border border-line/60 px-5 py-2 text-sm text-ink/75 hover:border-rose-muted hover:text-rose-muted transition-colors"
-              >
-                Rechazar
-              </button>
-            </form>
-            {quote.status === "confirmed" && (
-              <form action={cancelEventQuote} className="flex flex-col gap-2 w-full max-w-md">
-                <input type="hidden" name="id" value={quote.id} />
-                <Textarea
-                  name="notes"
-                  placeholder="Motivo de la cancelación (opcional)"
-                  rows={3}
-                  className="bg-bg"
-                />
-                <button
-                  type="submit"
-                  className="self-start rounded-full border border-line/60 px-5 py-2 text-sm text-ink/75 hover:border-rose-muted hover:text-rose-muted transition-colors"
-                >
-                  Cancelar evento
-                </button>
-              </form>
-            )}
-          </div>
-          <p className="mt-3 text-xs text-ink/55">
-            Cancelar o rechazar libera las fechas bloqueadas en ambas casas.
-          </p>
-        </Panel>
-      )}
+      <Panel title="Otras acciones">
+        <DetailDangerZone
+          id={quote.id}
+          status={quote.status}
+          listHref="/admin/cotizaciones"
+          recipient="cliente"
+          onReject={bulkRejectEventQuotes}
+          onCancel={bulkCancelEventQuotes}
+          onDelete={bulkDeleteEventQuotes}
+        />
+      </Panel>
     </div>
   );
 }
