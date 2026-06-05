@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { HeroVideo } from "@/components/media/HeroVideo";
 import {
   StaggerChildren,
   StaggerItem,
@@ -34,17 +35,11 @@ export default async function BrandLandingPage() {
     <main className="min-h-screen bg-bg">
       {/* Hero */}
       <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
-        <video
+        <HeroVideo
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
+          src="/videos/casacampo.mp4"
           poster="/fotos/casa_grande.avif"
-        >
-          <source src="/videos/casacampo.mp4" type="video/mp4" />
-        </video>
+        />
         <div
           aria-hidden
           className="absolute inset-0 bg-gradient-to-t from-teal-deep/85 via-teal-deep/40 to-teal/25 mix-blend-multiply"
@@ -57,14 +52,15 @@ export default async function BrandLandingPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-6 h-full flex flex-col justify-center">
           <FadeIn>
             <p className="text-sm uppercase tracking-widest text-bg/70 mb-6">
-              Refugios en el valle
+              Una experiencia en el valle
             </p>
             <h1 className="text-6xl md:text-8xl font-semibold text-bg tracking-tight max-w-4xl leading-[0.95]">
-              Desconecta lento. Vuelve renovado.
+              Desconecta sin prisa. El valle, solo para los tuyos.
             </h1>
             <p className="mt-8 text-lg md:text-xl text-bg/80 max-w-2xl">
-              Casas de campo en el valle del río Moche, a 40 minutos de
-              Trujillo. Naturaleza, silencio y el aire limpio que extrañaste.
+              Casas de campo privadas a orillas del río Moche, a 40 minutos de
+              Trujillo. Cada estancia, pensada al detalle: naturaleza, silencio
+              y el aire limpio que extrañabas.
             </p>
             <div className="mt-12">
               <Link
@@ -96,7 +92,7 @@ export default async function BrandLandingPage() {
                 Lo que nos une
               </p>
               <h2 className="text-4xl md:text-5xl font-semibold text-ink tracking-tight max-w-2xl">
-                Un mismo cuidado en cada propiedad
+                El mismo cuidado, hasta en el último detalle
               </h2>
             </FadeIn>
 
@@ -259,10 +255,10 @@ export default async function BrandLandingPage() {
         <div className="relative mx-auto max-w-3xl px-6 text-center">
           <FadeIn>
             <p className="text-sm uppercase tracking-widest text-teal-soft mb-4">
-              ¿Listo para venir?
+              Tu escapada empieza aquí
             </p>
             <h2 className="text-4xl md:text-5xl font-semibold text-bg tracking-tight">
-              Coordinemos tu llegada
+              Reservemos las fechas que son tuyas
             </h2>
             <p className="mt-6 text-bg/80 leading-relaxed">
               Respondemos por WhatsApp en minutos durante el horario de

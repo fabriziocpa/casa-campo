@@ -6,6 +6,32 @@ export const metadata = { title: "Ajustes" };
 export default async function AjustesPage() {
   const s = await getSettings();
 
+  const defaults = {
+    adminEmail: s.adminEmail,
+    contactEmail: s.contactEmail,
+    whatsapp: s.whatsapp,
+    whatsappEvents: s.whatsappEvents ?? "",
+    attentionHours: s.attentionHours,
+    instagram: s.instagram ?? "",
+    tiktok: s.tiktok ?? "",
+    facebook: s.facebook ?? "",
+    cancellationPolicy: s.cancellationPolicy,
+    eventAddonsNote: s.eventAddonsNote ?? "",
+  };
+
+  const formKey = [
+    defaults.adminEmail,
+    defaults.contactEmail,
+    defaults.whatsapp,
+    defaults.whatsappEvents,
+    defaults.attentionHours,
+    defaults.instagram,
+    defaults.tiktok,
+    defaults.facebook,
+    defaults.cancellationPolicy,
+    defaults.eventAddonsNote,
+  ].join("|");
+
   return (
     <div className="space-y-8 max-w-3xl">
       <header>
@@ -19,20 +45,7 @@ export default async function AjustesPage() {
         </p>
       </header>
 
-      <SettingsForm
-        defaults={{
-          adminEmail: s.adminEmail,
-          contactEmail: s.contactEmail,
-          whatsapp: s.whatsapp,
-          whatsappEvents: s.whatsappEvents ?? "",
-          attentionHours: s.attentionHours,
-          instagram: s.instagram ?? "",
-          tiktok: s.tiktok ?? "",
-          facebook: s.facebook ?? "",
-          cancellationPolicy: s.cancellationPolicy,
-          eventAddonsNote: s.eventAddonsNote ?? "",
-        }}
-      />
+      <SettingsForm key={formKey} defaults={defaults} />
     </div>
   );
 }

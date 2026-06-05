@@ -54,11 +54,11 @@ export const PROPERTIES: Property[] = [
     slug: "chalet",
     name: "Chalet",
     shortName: "Chalet",
-    tagline: "Tu refugio en el valle",
+    tagline: "Tu refugio privado en el valle",
     descriptionShort:
-      "Chalet en el corazón del valle, rodeado de naturaleza.",
+      "Un chalet íntimo en el corazón del valle, reservado solo para los tuyos.",
     descriptionLong:
-      "Refugio en el valle para desconectar. Naturaleza, vistas a las montañas, espacio íntimo para grupos pequeños. Cocina equipada, terraza al exterior, parrilla a leña y silencio absoluto al caer la noche.",
+      "Un refugio íntimo para desconectar sin prisa. Naturaleza, vistas a las montañas y un espacio reservado solo para tu grupo. Cocina equipada, terraza al exterior, parrilla a leña y silencio absoluto al caer la noche.",
     addressLine:
       "Km 23.5 Carretera a Simbal (antes del peaje). Sector Santa Rosa / Quirihuac",
     latitude: "-7.972500",
@@ -84,10 +84,11 @@ export const PROPERTIES: Property[] = [
     slug: "casa-grande",
     name: "Casa Principal",
     shortName: "Casa Principal",
-    tagline: "Donde la calma encuentra hogar",
-    descriptionShort: "Casa de campo con acceso directo al río Moche.",
+    tagline: "Donde la calma se vuelve hogar",
+    descriptionShort:
+      "Casa de campo con acceso privado al río Moche, pensada al detalle.",
     descriptionLong:
-      "Casa de campo con acceso directo al río, piscina, diseño moderno de cabaña. Ideal para familias grandes y celebraciones. Espacios al aire libre para reunirse, naturaleza en cada rincón y el sonido del río como banda sonora.",
+      "Casa de campo con acceso privado al río, piscina y diseño cálido de cabaña. El espacio entero, reservado para tu familia o celebración. Áreas al aire libre para reunirse, naturaleza en cada rincón y el sonido del río como banda sonora.",
     addressLine:
       "Quirihuac, valle del río Moche, La Libertad (a las afueras de Trujillo).",
     latitude: "-7.985000",
@@ -524,19 +525,19 @@ const contentRow = (
 
 export const CONTENT: Content[] = [
   // Brand-level "Lo que nos une"
-  contentRow("c-brand-01", null, "brand.value.1.title", "Refugio en el valle"),
+  contentRow("c-brand-01", null, "brand.value.1.title", "Un refugio solo tuyo"),
   contentRow(
     "c-brand-02",
     null,
     "brand.value.1.body",
-    "Naturaleza, silencio y aire limpio a 40 minutos de Trujillo.",
+    "La propiedad entera, reservada para tu grupo. Naturaleza, silencio y aire limpio a 40 minutos de Trujillo.",
   ),
-  contentRow("c-brand-03", null, "brand.value.2.title", "Diseño cálido"),
+  contentRow("c-brand-03", null, "brand.value.2.title", "Cuidado en cada detalle"),
   contentRow(
     "c-brand-04",
     null,
     "brand.value.2.body",
-    "Espacios pensados para el descanso, la conversación y los amaneceres lentos.",
+    "Espacios pensados al detalle para el descanso, la conversación y los amaneceres sin prisa.",
   ),
   contentRow("c-brand-05", null, "brand.value.3.title", "Atención cercana"),
   contentRow(
