@@ -1,10 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import {
-  eventQuoteSchema,
-  type EventQuoteInput,
-} from "./schemas";
+import { eventQuoteSchema, type EventQuoteInput } from "./schemas";
 import {
   ensurePropertyInDb,
   getPropertyById,
@@ -123,8 +120,7 @@ export async function submitEventQuote(
     settings.whatsappEvents ?? settings.whatsapp,
     `Hola CasaCampo, soy ${data.firstName}, sobre mi solicitud de evento en ${property.name}.`,
   );
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   await Promise.allSettled([
     send({
@@ -160,5 +156,5 @@ export async function submitEventQuote(
     }),
   ]);
 
-  redirect("/cotizacion/exito");
+  redirect(`/${property.slug}/eventos/exito`);
 }

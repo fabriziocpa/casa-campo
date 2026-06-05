@@ -4,6 +4,7 @@ import {
   Head,
   Html,
   Hr,
+  Img,
   Preview,
   Section,
   Text,
@@ -24,7 +25,12 @@ export function BrandShell({
       <Body style={body}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={brand}>CasaCampo</Text>
+            <Img
+              src="cid:brand-logo"
+              alt="CasaCampo"
+              width={140}
+              style={logo}
+            />
             <Text style={subtitle}>Refugios en el valle del río Moche</Text>
           </Section>
           {children}
@@ -64,10 +70,10 @@ const container = {
 
 const header = { paddingBottom: 16 };
 
-const brand = {
-  color: "#0f3a36",
-  fontSize: 22,
-  fontWeight: 600,
+const logo = {
+  display: "block",
+  width: 140,
+  height: "auto",
   margin: 0,
 };
 

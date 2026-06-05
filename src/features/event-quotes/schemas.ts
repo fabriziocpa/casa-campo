@@ -48,9 +48,16 @@ export const eventQuoteSchema = z.object({
     .regex(/^9\d{8}$/, "Teléfono peruano: 9 dígitos comenzando con 9"),
   message: z.string().max(1000).optional().or(z.literal("")),
 
-  consent: z.literal(true, {
-    message: "Debes aceptar las políticas para continuar",
-  }),
+  // The client submits via manually-built FormData, so the checkbox boolean
+  // arrives as the string "true". Coerce common truthy encodings back to a
+  // boolean before the literal check — otherwise every submit failed server-side
+  // validation ("missing fields") even though the box was ticked.
+  consent: z.preprocess(
+    (v) => v === true || v === "true" || v === "on" || v === "1",
+    z.literal(true, {
+      message: "Debes aceptar las políticas para continuar",
+    }),
+  ),
 
   website: z.string().max(0).optional().or(z.literal("")),
 });

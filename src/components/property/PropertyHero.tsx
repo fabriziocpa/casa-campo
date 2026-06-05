@@ -1,4 +1,5 @@
 import { FadeIn } from "@/components/motion/FadeIn";
+import { HeroVideo } from "@/components/media/HeroVideo";
 import type { Property } from "@/db/seed";
 
 const HERO_VIDEO_BY_SLUG: Record<string, string> = {
@@ -18,17 +19,11 @@ export function PropertyHero({ property }: { property: Property }) {
   return (
     <section className="relative h-[80vh] min-h-[560px] w-full overflow-hidden">
       {videoSrc ? (
-        <video
+        <HeroVideo
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
+          src={videoSrc}
           poster={posterSrc}
-        >
-          <source src={videoSrc} type="video/mp4" />
-        </video>
+        />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-teal-deep via-teal to-teal-deep" />
       )}
