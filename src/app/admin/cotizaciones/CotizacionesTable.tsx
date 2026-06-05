@@ -11,14 +11,12 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { formatPEN } from "@/lib/money";
 import {
-  confirmReservation,
-  bulkConfirmReservations,
-  bulkRejectReservations,
-  bulkCancelReservations,
-  bulkDeleteReservations,
-} from "@/features/reservations/adminActions";
+  setEventQuoteStatus,
+  bulkRejectEventQuotes,
+  bulkCancelEventQuotes,
+  bulkDeleteEventQuotes,
+} from "@/features/event-quotes/adminActions";
 import {
   Dialog,
   DialogContent,
@@ -29,50 +27,59 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
-type Status = "pending" | "confirmed" | "rejected" | "cancelled";
+type Status =
+  | "pending"
+  | "in_conversation"
+  | "quoted"
+  | "confirmed"
+  | "rejected"
+  | "cancelled";
 
-export type ReservaRow = {
+export type CotizacionRow = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   propertyName: string;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-  totalCents: number;
+  eventType: string;
+  tentativeDate: string | null;
+  estimatedGuests: number;
   status: Status;
 };
 
 const STATUS_LABEL: Record<Status, string> = {
   pending: "Pendiente",
+  in_conversation: "En conversación",
+  quoted: "Cotizada",
   confirmed: "Confirmada",
   rejected: "Rechazada",
   cancelled: "Cancelada",
 };
 
-type BulkMode = "confirm" | "reject" | "cancel" | "delete";
+const SIN_CONFIRMAR: Status[] = ["pending", "in_conversation", "quoted"];
+
+type BulkMode = "reject" | "cancel" | "delete";
 
 type ResultBanner = { ok: boolean; message: string } | null;
 
-// Eligibility of a set of rows for each action. Mirrors the server-side gates:
-// reject only on "sin confirmar" (pending), cancel only on confirmed, delete
-// on anything that isn't confirmed (confirmed must be cancelled first).
-function eligibility(rs: ReservaRow[]) {
+// Eligibility mirrors the server-side gates: reject only on "sin confirmar"
+// quotes, cancel only on confirmed, delete on anything that isn't confirmed
+// (a confirmed quote must be cancelled first).
+function eligibility(rs: CotizacionRow[]) {
   return {
-    confirmable: rs.filter((r) => r.status === "pending").map((r) => r.id),
-    rejectable: rs.filter((r) => r.status === "pending").map((r) => r.id),
+    rejectable: rs
+      .filter((r) => SIN_CONFIRMAR.includes(r.status))
+      .map((r) => r.id),
     cancellable: rs.filter((r) => r.status === "confirmed").map((r) => r.id),
     deletable: rs.filter((r) => r.status !== "confirmed").map((r) => r.id),
   };
 }
 
-export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
+export function CotizacionesTable({ rows }: { rows: CotizacionRow[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [mode, setMode] = useState<BulkMode | null>(null);
-  // When set, the open dialog targets just this row (single-row action) instead
-  // of the multi-selection — so single-row actions don't clobber a selection.
+  // When set, the open dialog targets just this row (single-row action).
   const [single, setSingle] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [banner, setBanner] = useState<ResultBanner>(null);
@@ -88,11 +95,8 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
   );
   const selectedCount = selectedRows.length;
 
-  // Counts shown on the bulk bar come from the multi-selection.
   const barEligible = eligibility(selectedRows);
 
-  // The dialog and the action run against the target rows: a single row when a
-  // single-row action opened it, otherwise the whole selection.
   const targetRows = single ? rows.filter((r) => r.id === single) : selectedRows;
   const target = eligibility(targetRows);
 
@@ -137,30 +141,24 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
     if (!mode) return;
     startTransition(async () => {
       try {
-        if (mode === "confirm") {
-          const r = await bulkConfirmReservations(target.confirmable);
-          const parts: string[] = [];
-          if (r.confirmed) parts.push(`${r.confirmed} confirmada(s)`);
-          if (r.conflicts.length) {
-            const detail = r.conflicts
-              .map((c) => `${c.name} (${c.dates.join(", ")})`)
-              .join("; ");
-            parts.push(`${r.conflicts.length} con conflicto: ${detail}`);
-          }
-          if (r.errors) parts.push(`${r.errors} con error`);
+        if (mode === "reject") {
+          const r = await bulkRejectEventQuotes(target.rejectable, notes.trim());
           setBanner({
-            ok: r.conflicts.length === 0 && r.errors === 0,
-            message: parts.join(". ") || "Nada que confirmar.",
+            ok: true,
+            message: `${r.rejected} cotización(es) rechazada(s).`,
           });
-        } else if (mode === "reject") {
-          const r = await bulkRejectReservations(target.rejectable, notes.trim());
-          setBanner({ ok: true, message: `${r.rejected} reserva(s) rechazada(s).` });
         } else if (mode === "cancel") {
-          const r = await bulkCancelReservations(target.cancellable, notes.trim());
-          setBanner({ ok: true, message: `${r.cancelled} reserva(s) cancelada(s).` });
+          const r = await bulkCancelEventQuotes(target.cancellable, notes.trim());
+          setBanner({
+            ok: true,
+            message: `${r.cancelled} cotización(es) cancelada(s).`,
+          });
         } else {
-          const r = await bulkDeleteReservations(target.deletable);
-          setBanner({ ok: true, message: `${r.deleted} reserva(s) eliminada(s).` });
+          const r = await bulkDeleteEventQuotes(target.deletable);
+          setBanner({
+            ok: true,
+            message: `${r.deleted} cotización(es) eliminada(s).`,
+          });
         }
         if (!single) setSelected(new Set());
         setNotes("");
@@ -177,32 +175,25 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
     BulkMode,
     { title: string; description: string; cta: string; danger?: boolean; count: number }
   > = {
-    confirm: {
-      title: "Confirmar en conjunto",
-      description:
-        "Se confirmarán las reservas pendientes seleccionadas y se enviará el correo de confirmación. Las que tengan conflicto de fechas se omiten.",
-      cta: "Confirmar",
-      count: target.confirmable.length,
-    },
     reject: {
       title: "Rechazar en conjunto",
       description:
-        "Se marcarán como rechazadas y se liberarán sus fechas. Se enviará el correo de rechazo a cada huésped.",
+        "Se marcarán como rechazadas y se liberarán sus fechas. Se enviará el correo de rechazo a cada cliente.",
       cta: "Rechazar",
       count: target.rejectable.length,
     },
     cancel: {
-      title: "Cancelar reservas confirmadas",
+      title: "Cancelar eventos confirmados",
       description:
-        "Se marcarán como canceladas y se liberarán sus fechas bloqueadas. No se envía correo al huésped.",
-      cta: "Cancelar reservas",
+        "Se marcarán como cancelados y se liberarán sus fechas bloqueadas (evento y estacionamiento). No se envía correo al cliente.",
+      cta: "Cancelar eventos",
       danger: true,
       count: target.cancellable.length,
     },
     delete: {
       title: "Eliminar en conjunto",
       description:
-        "Se eliminarán permanentemente las reservas seleccionadas y sus fechas bloqueadas. Las confirmadas deben cancelarse primero. Esta acción no se puede deshacer.",
+        "Se eliminarán permanentemente las cotizaciones seleccionadas y sus fechas bloqueadas. Las confirmadas deben cancelarse primero. Esta acción no se puede deshacer.",
       cta: "Eliminar",
       danger: true,
       count: target.deletable.length,
@@ -241,13 +232,6 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
             {selectedCount} seleccionada{selectedCount === 1 ? "" : "s"}
           </span>
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => openBulk("confirm")}
-              disabled={barEligible.confirmable.length === 0 || pending}
-              className="rounded-full bg-teal-deep text-bg px-3 py-1 text-xs font-medium hover:bg-teal disabled:opacity-40 transition-colors"
-            >
-              Confirmar ({barEligible.confirmable.length})
-            </button>
             <button
               onClick={() => openBulk("reject")}
               disabled={barEligible.rejectable.length === 0 || pending}
@@ -293,98 +277,85 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
                   aria-label="Seleccionar todas"
                 />
               </th>
-              <th className="text-left px-4 py-3">Huésped</th>
+              <th className="text-left px-4 py-3">Cliente</th>
+              <th className="text-left px-4 py-3">Tipo</th>
               <th className="text-left px-4 py-3">Casa</th>
-              <th className="text-left px-4 py-3">Fechas</th>
+              <th className="text-left px-4 py-3">Fecha tentativa</th>
               <th className="text-right px-4 py-3">Pers.</th>
-              <th className="text-right px-4 py-3">Total</th>
               <th className="text-left px-4 py-3">Estado</th>
               <th className="text-right px-4 py-3">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line/50">
-            {rows.map((r) => (
+            {rows.map((q) => (
               <tr
-                key={r.id}
+                key={q.id}
                 className={`transition-colors ${
-                  selected.has(r.id) ? "bg-teal-soft/40" : "hover:bg-teal-soft/30"
+                  selected.has(q.id) ? "bg-teal-soft/40" : "hover:bg-teal-soft/30"
                 }`}
               >
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
-                    checked={selected.has(r.id)}
-                    onChange={() => toggle(r.id)}
+                    checked={selected.has(q.id)}
+                    onChange={() => toggle(q.id)}
                     className="size-4 accent-teal-deep cursor-pointer align-middle"
-                    aria-label={`Seleccionar reserva de ${r.firstName} ${r.lastName}`}
+                    aria-label={`Seleccionar cotización de ${q.firstName} ${q.lastName}`}
                   />
                 </td>
                 <td className="px-4 py-3">
                   <Link
-                    href={`/admin/reservas/${r.id}`}
+                    href={`/admin/cotizaciones/${q.id}`}
                     className="font-medium text-ink hover:text-teal-deep"
                   >
-                    {r.firstName} {r.lastName}
+                    {q.firstName} {q.lastName}
                   </Link>
-                  <p className="text-xs text-ink/50">{r.email}</p>
+                  <p className="text-xs text-ink/50">{q.email}</p>
                 </td>
-                <td className="px-4 py-3 text-ink/75">{r.propertyName}</td>
-                <td className="px-4 py-3 text-ink/75">
-                  {r.checkIn} → {r.checkOut}
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums">{r.guests}</td>
-                <td className="px-4 py-3 text-right tabular-nums font-medium text-teal-deep">
-                  {formatPEN(r.totalCents)}
+                <td className="px-4 py-3 text-ink/75 capitalize">{q.eventType}</td>
+                <td className="px-4 py-3 text-ink/75">{q.propertyName}</td>
+                <td className="px-4 py-3 text-ink/75">{q.tentativeDate ?? "—"}</td>
+                <td className="px-4 py-3 text-right tabular-nums">
+                  {q.estimatedGuests}
                 </td>
                 <td className="px-4 py-3">
-                  <StatusBadge status={r.status} />
+                  <StatusBadge status={q.status} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1.5">
-                    {r.status === "pending" && (
-                      <>
-                        <form action={confirmReservation}>
-                          <input type="hidden" name="id" value={r.id} />
-                          <button
-                            type="submit"
-                            className="rounded-full bg-teal-deep text-bg px-3 py-1 text-xs font-medium hover:bg-teal transition-colors"
-                            title="Confirmar reserva (verifica conflictos)"
-                          >
-                            Confirmar
-                          </button>
-                        </form>
-                        <button
-                          onClick={() => openSingle(r.id, "reject")}
-                          className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
-                          title="Rechazar"
-                        >
-                          Rechazar
-                        </button>
-                      </>
-                    )}
-                    {r.status === "confirmed" && (
+                    <InlineTransition status={q.status} id={q.id} />
+                    {SIN_CONFIRMAR.includes(q.status) && (
                       <button
-                        onClick={() => openSingle(r.id, "cancel")}
+                        onClick={() => openSingle(q.id, "reject")}
+                        className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
+                        title="Rechazar"
+                      >
+                        Rechazar
+                      </button>
+                    )}
+                    {q.status === "confirmed" && (
+                      <button
+                        onClick={() => openSingle(q.id, "cancel")}
                         className="rounded-full border border-line/60 px-3 py-1 text-xs text-ink/70 hover:border-rose-muted hover:text-rose-muted transition-colors"
                         title="Cancelar (libera fechas)"
                       >
                         Cancelar
                       </button>
                     )}
-                    {r.status !== "confirmed" && (
+                    {q.status !== "confirmed" && (
                       <button
-                        onClick={() => openSingle(r.id, "delete")}
+                        onClick={() => openSingle(q.id, "delete")}
                         className="inline-flex items-center rounded-full border border-rose-muted/60 text-rose-muted p-1.5 hover:bg-rose-muted/10 transition-colors"
                         title="Eliminar"
-                        aria-label="Eliminar reserva"
+                        aria-label="Eliminar cotización"
                       >
                         <Trash2 className="size-3.5" />
                       </button>
                     )}
                     <Link
-                      href={`/admin/reservas/${r.id}`}
+                      href={`/admin/cotizaciones/${q.id}`}
                       className="inline-flex items-center rounded-full text-teal-deep hover:bg-teal-soft/50 p-1.5 transition-colors"
-                      aria-label="Abrir reserva"
+                      aria-label="Abrir cotización"
                     >
                       <ChevronRight className="size-4" />
                     </Link>
@@ -404,8 +375,8 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
                 <DialogTitle>{modalCopy[mode].title}</DialogTitle>
                 <DialogDescription>
                   {modalCopy[mode].count === 0
-                    ? "Ninguna de las reservas seleccionadas aplica para esta acción."
-                    : `${modalCopy[mode].count} reserva(s) afectada(s). ${modalCopy[mode].description}`}
+                    ? "Ninguna de las cotizaciones seleccionadas aplica para esta acción."
+                    : `${modalCopy[mode].count} cotización(es) afectada(s). ${modalCopy[mode].description}`}
                 </DialogDescription>
               </DialogHeader>
 
@@ -422,7 +393,7 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
                       className="mt-1 bg-bg"
                       placeholder={
                         mode === "reject"
-                          ? "Se incluye en el correo al huésped"
+                          ? "Se incluye en el correo al cliente"
                           : "Nota interna (no se envía correo)"
                       }
                     />
@@ -458,9 +429,39 @@ export function ReservasTable({ rows }: { rows: ReservaRow[] }) {
   );
 }
 
+// Quick non-destructive status transitions (pending → en conversación → cotizada)
+// as plain form actions — no confirmation needed. Confirming an event needs
+// dates and lives on the detail page.
+function InlineTransition({ status, id }: { status: Status; id: string }) {
+  const next: { label: string; status: "in_conversation" | "quoted" } | null =
+    status === "pending"
+      ? { label: "En conversación", status: "in_conversation" }
+      : status === "in_conversation"
+        ? { label: "Marcar cotizada", status: "quoted" }
+        : null;
+
+  if (!next) return null;
+
+  return (
+    <form action={setEventQuoteStatus}>
+      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="status" value={next.status} />
+      <button
+        type="submit"
+        className="rounded-full bg-teal-soft text-teal-deep px-3 py-1 text-xs font-medium hover:bg-teal-soft/70 transition-colors"
+        title={`Mover a ${next.label.toLowerCase()}`}
+      >
+        {next.label}
+      </button>
+    </form>
+  );
+}
+
 function StatusBadge({ status }: { status: Status }) {
   const styles: Record<Status, string> = {
     pending: "bg-gold/20 text-ink ring-gold/40",
+    in_conversation: "bg-teal-soft/70 text-teal-deep ring-teal-deep/30",
+    quoted: "bg-teal-soft text-teal-deep ring-teal-deep/40",
     confirmed: "bg-teal-deep text-bg ring-teal-deep",
     rejected: "bg-rose-muted/30 text-ink ring-rose-muted/50",
     cancelled: "bg-line/40 text-ink/60 ring-line",

@@ -6,6 +6,7 @@ import { addDays, eachDayOfInterval, format, parseISO, subDays } from "date-fns"
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { blockedDates, eventQuotes } from "@/db/schema";
+import { EVENT_QUOTES } from "@/db/seed";
 import { getEventQuoteById } from "@/features/event-quotes/queries";
 import { getEventPackageById } from "@/features/event-packages/queries";
 import { getPropertyById } from "@/features/properties/queries";
@@ -264,13 +265,23 @@ export async function setEventQuoteStatus(formData: FormData): Promise<void> {
   revalidate(id, quote ? [quote.propertyId] : []);
 }
 
-export async function rejectEventQuote(formData: FormData): Promise<void> {
-  const id = String(formData.get("id") ?? "").trim();
-  const notes = String(formData.get("notes") ?? "").trim();
-  if (!id) return;
+type CoreResult = { ok: boolean; propertyId: string | null };
 
+const SIN_CONFIRMAR: ReadonlyArray<string> = [
+  "pending",
+  "in_conversation",
+  "quoted",
+];
+
+// Reject a single quote without redirecting. Only applies to "sin confirmar"
+// quotes (pending/in_conversation/quoted) — a confirmed event must be cancelled,
+// not rejected. Frees any held dates and emails the customer.
+async function rejectCore(id: string, notes?: string): Promise<CoreResult> {
   const quote = await getEventQuoteById(id);
-  if (!quote) return;
+  if (!quote) return { ok: false, propertyId: null };
+  if (!SIN_CONFIRMAR.includes(quote.status)) {
+    return { ok: false, propertyId: quote.propertyId };
+  }
 
   try {
     await db
@@ -283,6 +294,7 @@ export async function rejectEventQuote(formData: FormData): Promise<void> {
       .where(eq(eventQuotes.id, id));
   } catch (err) {
     console.error("[event-quotes] reject failed:", err);
+    return { ok: false, propertyId: quote.propertyId };
   }
   await clearBlocksForQuote(id);
 
@@ -306,16 +318,18 @@ export async function rejectEventQuote(formData: FormData): Promise<void> {
     });
   }
 
-  revalidate(id, [quote.propertyId]);
+  return { ok: true, propertyId: quote.propertyId };
 }
 
-export async function cancelEventQuote(formData: FormData): Promise<void> {
-  const id = String(formData.get("id") ?? "").trim();
-  const notes = String(formData.get("notes") ?? "").trim();
-  if (!id) return;
-
+// Cancel a single quote without redirecting. Only applies to a confirmed event.
+// Frees its blocked dates (event + parking). No email is sent — cancellation is
+// internal admin cleanup; an optional motivo is stored as adminNotes.
+async function cancelCore(id: string, notes?: string): Promise<CoreResult> {
   const quote = await getEventQuoteById(id);
-  if (!quote) return;
+  if (!quote) return { ok: false, propertyId: null };
+  if (quote.status !== "confirmed") {
+    return { ok: false, propertyId: quote.propertyId };
+  }
 
   try {
     await db
@@ -328,10 +342,119 @@ export async function cancelEventQuote(formData: FormData): Promise<void> {
       .where(eq(eventQuotes.id, id));
   } catch (err) {
     console.error("[event-quotes] cancel failed:", err);
+    return { ok: false, propertyId: quote.propertyId };
   }
   await clearBlocksForQuote(id);
 
-  revalidate(id, [quote.propertyId]);
+  return { ok: true, propertyId: quote.propertyId };
+}
+
+// Permanently delete a quote. Gated: a confirmed event can NOT be deleted — it
+// must be cancelled first. Because blocked_dates.event_quote_id has no FK
+// cascade, we explicitly clear any leftover blocks before removing the row.
+async function deleteCore(id: string): Promise<CoreResult> {
+  const quote = await getEventQuoteById(id);
+  if (!quote) {
+    // Mock-seed fallback for demo rows.
+    const idx = EVENT_QUOTES.findIndex((q) => q.id === id);
+    if (idx === -1) return { ok: false, propertyId: null };
+    EVENT_QUOTES.splice(idx, 1);
+    return { ok: true, propertyId: null };
+  }
+  if (quote.status === "confirmed") {
+    return { ok: false, propertyId: quote.propertyId };
+  }
+
+  await clearBlocksForQuote(id);
+
+  try {
+    const deleted = await db
+      .delete(eventQuotes)
+      .where(eq(eventQuotes.id, id))
+      .returning({ id: eventQuotes.id });
+    if (deleted.length > 0) return { ok: true, propertyId: quote.propertyId };
+  } catch (err) {
+    console.error("[event-quotes] delete failed:", err);
+  }
+  const idx = EVENT_QUOTES.findIndex((q) => q.id === id);
+  if (idx !== -1) {
+    EVENT_QUOTES.splice(idx, 1);
+    return { ok: true, propertyId: quote.propertyId };
+  }
+  return { ok: false, propertyId: quote.propertyId };
+}
+
+export async function rejectEventQuote(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  if (!id) return;
+  const { propertyId } = await rejectCore(id, notes);
+  revalidate(id, propertyId ? [propertyId] : []);
+}
+
+export async function cancelEventQuote(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  if (!id) return;
+  const { propertyId } = await cancelCore(id, notes);
+  revalidate(id, propertyId ? [propertyId] : []);
+}
+
+export async function deleteEventQuote(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+  const { propertyId } = await deleteCore(id);
+  revalidate(id, propertyId ? [propertyId] : []);
+}
+
+// ---- Bulk actions (called as RPC from the client tables) ----
+
+function uniqueIds(ids: string[]): string[] {
+  return [...new Set(ids.filter(Boolean))];
+}
+
+export async function bulkRejectEventQuotes(
+  ids: string[],
+  notes?: string,
+): Promise<{ rejected: number }> {
+  let rejected = 0;
+  const propertyIds = new Set<string>();
+  for (const id of uniqueIds(ids)) {
+    const r = await rejectCore(id, notes);
+    if (r.ok) rejected++;
+    if (r.propertyId) propertyIds.add(r.propertyId);
+  }
+  revalidate("", [...propertyIds]);
+  return { rejected };
+}
+
+export async function bulkCancelEventQuotes(
+  ids: string[],
+  notes?: string,
+): Promise<{ cancelled: number }> {
+  let cancelled = 0;
+  const propertyIds = new Set<string>();
+  for (const id of uniqueIds(ids)) {
+    const r = await cancelCore(id, notes);
+    if (r.ok) cancelled++;
+    if (r.propertyId) propertyIds.add(r.propertyId);
+  }
+  revalidate("", [...propertyIds]);
+  return { cancelled };
+}
+
+export async function bulkDeleteEventQuotes(
+  ids: string[],
+): Promise<{ deleted: number }> {
+  let deleted = 0;
+  const propertyIds = new Set<string>();
+  for (const id of uniqueIds(ids)) {
+    const r = await deleteCore(id);
+    if (r.ok) deleted++;
+    if (r.propertyId) propertyIds.add(r.propertyId);
+  }
+  revalidate("", [...propertyIds]);
+  return { deleted };
 }
 
 // Kept for backwards-compat in case other call sites import it.
