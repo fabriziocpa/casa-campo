@@ -1,8 +1,9 @@
-// In-memory seed for v1 build phase (no Postgres yet).
+// In-memory seed data + shared row types.
 //
-// When Supabase project lands, convert this file into a pnpm seed script
-// that runs the equivalent db.insert(...).values(...) against the real DB.
-// Public query layer in src/features/queries.ts files reads from these arrays.
+// Supabase is live; these arrays now double as the in-memory fallback the public
+// query layer (src/features/*/queries.ts) returns when a DB read fails or is empty.
+// TODO: extract into a standalone `pnpm db:seed` script and move the row types
+// next to schema.ts, once the fallback pattern is retired.
 //
 // UUIDs are deterministic placeholders so FKs remain stable across reloads.
 
