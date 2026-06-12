@@ -393,6 +393,7 @@ export function ReservationForm({
                 <a
                   href="/politicas"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="text-teal-deep underline hover:no-underline"
                 >
                   políticas de reserva y privacidad

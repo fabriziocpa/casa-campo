@@ -185,6 +185,7 @@ export default async function ReservaDetailPage({
           <Link
             href={`/${propertyPage.slug}`}
             target="_blank"
+            rel="noopener noreferrer"
             className="text-teal-deep hover:underline"
           >
             /{propertyPage.slug}

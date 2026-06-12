@@ -371,6 +371,7 @@ export function EventQuoteForm({
               <a
                 href="/politicas"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-teal-deep underline hover:no-underline"
               >
                 políticas de privacidad
