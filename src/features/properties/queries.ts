@@ -1,8 +1,8 @@
 /**
  * Property queries.
  *
- * Mock impl reads from `src/db/seed.ts`. Swap to real Drizzle calls when
- * Supabase project is provisioned — keep function signatures identical.
+ * Reads from Supabase via Drizzle, falling back to the in-memory `src/db/seed.ts`
+ * arrays if a DB read fails or returns empty (dev/demo safety net).
  */
 
 import { and, asc, eq } from "drizzle-orm";
