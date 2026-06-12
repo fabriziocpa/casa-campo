@@ -129,16 +129,20 @@ const EVENT_PACKAGES = [
   ["41111111-0000-0000-0000-000000000004", CASA_GRANDE_ID, "Hasta 150 personas", 150, 650000, 16, 2, 2, "10:00", "19:00", CHALET_ID, 40, "Eventos de gran escala: bodas, corporativos, celebraciones familiares.", 40],
 ];
 
-// Rooms
+// Rooms — must mirror src/db/seed.ts exactly (same UUIDs, floors, beds).
 const ROOMS = [
-  ["a1111111-0000-0000-0000-000000000001", CHALET_ID, "Planta principal", "Dormitorio principal", "Cama king-size, vista al valle, baño en suite.", [{ size: "King", count: 1 }], true, 0],
-  ["a1111111-0000-0000-0000-000000000002", CHALET_ID, "Planta principal", "Dormitorio doble", "Dos camas de 2 plazas, ideal para amigos o familia.", [{ size: "2 plazas", count: 2 }], false, 1],
-  ["a1111111-0000-0000-0000-000000000003", CHALET_ID, "Planta principal", "Loft adicional", "Cama de plaza y media en altillo, perfecto para un huésped extra.", [{ size: "1.5 plazas", count: 1 }], false, 2],
-  ["b2222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "1er piso", "Suite principal", "King-size, baño en suite, terraza con vista al río.", [{ size: "King", count: 1 }], true, 0],
-  ["b2222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "1er piso", "Habitación familiar", "Dos camas de 2 plazas + una cuna disponible bajo solicitud.", [{ size: "2 plazas", count: 2 }], true, 1],
-  ["b2222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "2do piso", "Dormitorio doble A", "Dos camas individuales, ventana al jardín.", [{ size: "1 plaza", count: 2 }], false, 2],
-  ["b2222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "2do piso", "Dormitorio doble B", "Una cama queen + un sofá-cama de 1 plaza.", [{ size: "Queen", count: 1 }, { size: "1 plaza (sofá-cama)", count: 1 }], false, 3],
-  ["b2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "Casa Principal · Cabaña", "Cabaña", "Cabaña independiente con cuatro camas individuales. Se habilita exclusivamente para grupos de más de 12 personas (tarifa 16).", [{ size: "1 plaza", count: 4 }], true, 4],
+  // Chalet — 2 habitaciones, planta principal
+  ["aaaaaaa1-0000-0000-0000-000000000001", CHALET_ID, "Planta principal", "Dormitorio principal", "Dos camas de 2 plazas y baño completo.", [{ size: "2 plazas", count: 2 }], true, 0],
+  ["aaaaaaa1-0000-0000-0000-000000000002", CHALET_ID, "Planta principal", "Habitación", "Una cama de 2 plazas.", [{ size: "2 plazas", count: 1 }], false, 1],
+  // Casa Principal — 1er piso
+  ["bbbbbbb2-0000-0000-0000-000000000001", CASA_GRANDE_ID, "1er piso", "Habitación", "Una cama de 2 plazas.", [{ size: "2 plazas", count: 1 }], false, 0],
+  ["bbbbbbb2-0000-0000-0000-000000000002", CASA_GRANDE_ID, "1er piso", "Habitación de servicio", "Una cama de 2 plazas.", [{ size: "2 plazas", count: 1 }], false, 1],
+  // Casa Principal — 2do piso
+  ["bbbbbbb2-0000-0000-0000-000000000003", CASA_GRANDE_ID, "2do piso", "Dormitorio doble", "Dos camas de 2 plazas.", [{ size: "2 plazas", count: 2 }], false, 2],
+  ["bbbbbbb2-0000-0000-0000-000000000004", CASA_GRANDE_ID, "2do piso", "Dormitorio múltiple", "Tres camas de 1 plaza y media.", [{ size: "1.5 plazas", count: 3 }], false, 3],
+  ["bbbbbbb2-0000-0000-0000-000000000005", CASA_GRANDE_ID, "2do piso", "Dormitorio principal", "Cama King.", [{ size: "King", count: 1 }], true, 4],
+  // Cabaña — se habilita para grupos 12+
+  ["bbbbbbb2-0000-0000-0000-000000000006", CASA_GRANDE_ID, "Casa Principal · Cabaña", "Cabaña", "Dormitorio principal con dos camas de 2 plazas y baño completo. Se habilita exclusivamente para grupos de más de 12 personas (tarifa 16).", [{ size: "2 plazas", count: 2 }], true, 5],
 ];
 
 // Amenities — deterministic UUIDs derived from amen-c-NN / amen-q-NN slugs
@@ -190,7 +194,7 @@ const RULES = [
 const CONTENT = [
   // Brand-level
   ["e0000000-0000-0000-0000-000000000001", null, "brand.value.1.title", "Un refugio solo tuyo"],
-  ["e0000000-0000-0000-0000-000000000002", null, "brand.value.1.body", "La propiedad entera, reservada para tu grupo. Naturaleza, silencio y aire limpio a 40 minutos de Trujillo."],
+  ["e0000000-0000-0000-0000-000000000002", null, "brand.value.1.body", "La propiedad entera, reservada para tu grupo. Naturaleza, silencio y aire limpio a 30 minutos de Trujillo."],
   ["e0000000-0000-0000-0000-000000000003", null, "brand.value.2.title", "Cuidado en cada detalle"],
   ["e0000000-0000-0000-0000-000000000004", null, "brand.value.2.body", "Espacios pensados al detalle para el descanso, la conversación y los amaneceres sin prisa."],
   ["e0000000-0000-0000-0000-000000000005", null, "brand.value.3.title", "Atención cercana"],
@@ -202,7 +206,7 @@ const CONTENT = [
   ["e1111111-0000-0000-0000-000000000003", CHALET_ID, "faq.q.2", "¿Hay cobertura celular en el Chalet?"],
   ["e1111111-0000-0000-0000-000000000004", CHALET_ID, "faq.a.2", "Sí, además contamos con WiFi de alta velocidad."],
   ["e1111111-0000-0000-0000-000000000005", CHALET_ID, "faq.q.3", "¿Cómo llego desde Trujillo?"],
-  ["e1111111-0000-0000-0000-000000000006", CHALET_ID, "faq.a.3", "Aproximadamente 40 minutos en auto por la carretera a Simbal. Te enviamos un pin de Google Maps al confirmar."],
+  ["e1111111-0000-0000-0000-000000000006", CHALET_ID, "faq.a.3", "Aproximadamente 30 minutos en auto por la carretera a Simbal. Te enviamos un pin de Google Maps al confirmar."],
   ["e1111111-0000-0000-0000-000000000007", CHALET_ID, "faq.q.4", "¿Aceptan mascotas?"],
   ["e1111111-0000-0000-0000-000000000008", CHALET_ID, "faq.a.4", "Sí, con acuerdo previo. Coordinemos por WhatsApp antes de reservar."],
   ["e1111111-0000-0000-0000-000000000009", CHALET_ID, "faq.q.5", "¿Cómo se confirma la reserva?"],
@@ -214,7 +218,7 @@ const CONTENT = [
   ["e2222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "faq.q.2", "¿Puedo hacer un evento en Casa Principal?"],
   ["e2222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "faq.a.2", "Sí, contamos con paquetes desde 20 hasta 150 personas. Revisa la sección Eventos."],
   ["e2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "faq.q.3", "¿Cuál es la diferencia entre tarifa 12 y 16 personas?"],
-  ["e2222222-0000-0000-0000-000000000006", CASA_GRANDE_ID, "faq.a.3", "La tarifa 12 usa la casa principal (4 habitaciones). La tarifa 16, para grupos de más de 12, habilita además la Cabaña — un espacio exclusivo con 4 camas adicionales."],
+  ["e2222222-0000-0000-0000-000000000006", CASA_GRANDE_ID, "faq.a.3", "La tarifa 12 usa la casa principal (5 habitaciones). La tarifa 16, para grupos de más de 12, habilita además la Cabaña — un espacio exclusivo con dos camas de 2 plazas."],
   ["e2222222-0000-0000-0000-000000000007", CASA_GRANDE_ID, "faq.q.4", "¿Puedo llegar con mi mascota?"],
   ["e2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "faq.a.4", "Sí, Casa Principal es pet-friendly. Supervisa cerca del río y el jardín."],
   ["e2222222-0000-0000-0000-000000000009", CASA_GRANDE_ID, "faq.q.5", "¿Qué incluye la modalidad full 2 días 1 noche?"],
@@ -313,6 +317,14 @@ try {
   }
   console.log(`  ${EVENT_PACKAGES.length} event packages ensured`);
 
+  // Drop any stale room rows for these properties (the previous layout used
+  // different UUIDs) so re-seeding replaces the rooms instead of duplicating them.
+  const ROOM_IDS = ROOMS.map(([id]) => id);
+  await sql`
+    delete from rooms
+    where property_id in (${CHALET_ID}, ${CASA_GRANDE_ID})
+      and id::text <> all(${ROOM_IDS})
+  `;
   for (const [id, propertyId, floor, name, description, beds, hasBathroom, order] of ROOMS) {
     await sql`
       insert into rooms (
@@ -321,7 +333,13 @@ try {
         ${id}, ${propertyId}, ${floor}, ${name}, ${description},
         ${JSON.stringify(beds)}::jsonb, ${hasBathroom}, ${order}
       )
-      on conflict (id) do nothing
+      on conflict (id) do update set
+        floor = excluded.floor,
+        name = excluded.name,
+        description = excluded.description,
+        beds = excluded.beds,
+        has_bathroom = excluded.has_bathroom,
+        "order" = excluded."order"
     `;
   }
   console.log(`  ${ROOMS.length} rooms ensured`);
