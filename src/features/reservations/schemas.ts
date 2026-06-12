@@ -1,11 +1,8 @@
 import { z } from "zod";
+import { consentField, honeypot, isoDate, peruPhone } from "@/features/_shared/fields";
 
 export const docTypes = ["DNI", "CE", "PASSPORT"] as const;
 export type DocType = (typeof docTypes)[number];
-
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida");
 
 export const reservationSchema = z
   .object({
@@ -25,21 +22,11 @@ export const reservationSchema = z
     firstName: z.string().trim().min(2, "Ingresa tu nombre"),
     lastName: z.string().trim().min(2, "Ingresa tus apellidos"),
     email: z.string().email("Correo inválido"),
-    phone: z
-      .string()
-      .trim()
-      .regex(/^9\d{8}$/, "Teléfono peruano: 9 dígitos comenzando con 9"),
+    phone: peruPhone,
     message: z.string().max(800).optional().or(z.literal("")),
 
-    // Accept boolean true (client RHF state) OR string "true" (FormData over the
-    // wire — checkboxes serialize as strings when the form action is invoked
-    // programmatically through useActionState).
-    consent: z
-      .union([z.literal(true), z.literal("true")])
-      .transform(() => true as const),
-
-    // Honeypot — bots fill this, humans don't. Server rejects if present.
-    website: z.string().max(0).optional().or(z.literal("")),
+    consent: consentField,
+    website: honeypot,
   })
   .superRefine((data, ctx) => {
     if (data.checkIn >= data.checkOut) {

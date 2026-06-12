@@ -47,6 +47,7 @@ export default async function PropertiesListPage() {
               <Link
                 href={`/${property.slug}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-teal-deep hover:underline"
               >
                 Ver pública

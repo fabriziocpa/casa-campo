@@ -9,7 +9,7 @@ New properties can be added from `/admin` without code changes — every propert
 
 ## Stack
 
-Next.js 16 (App Router, RSC, Server Actions) · TypeScript · Tailwind v4 + shadcn/ui · Supabase Postgres + Drizzle · Supabase Auth (magic link) · Resend + React Email · react-hook-form + Zod · Vercel.
+Next.js 16 (App Router, RSC, Server Actions) · TypeScript · Tailwind v4 + shadcn/ui · Supabase Postgres + Drizzle · Supabase Auth (email + password) · Resend + React Email · react-hook-form + Zod · Vercel.
 
 Package manager **pnpm**. Node **22 LTS**. UI copy in Spanish; code in English.
 
@@ -25,7 +25,7 @@ pnpm dev                      # http://localhost:3000
 
 ### Environment variables
 
-See `.env.example`. Required: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_EMAILS`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `NEXT_PUBLIC_SITE_URL`.
+See `.env.example`. Required: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ADMIN_EMAILS`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `NOTIFY_EMAIL`, `NEXT_PUBLIC_SITE_URL`.
 
 - `DATABASE_URL` — use the Supabase **transaction pooler** (port `6543`) in production.
 - `RESEND_API_KEY` missing → email `send()` no-ops (dev won't crash).

@@ -18,10 +18,10 @@ export const PROPERTY_PHOTOS: Record<string, Photo[]> = {
     { src: "/casa grande/sala_horizontal.avif", alt: "Sala principal", aspect: "landscape" },
     { src: "/casa grande/vista_piscina_horizontal.avif", alt: "Vista a la piscina", aspect: "landscape" },
     { src: "/casa grande/comedor_vertical.avif", alt: "Comedor", aspect: "portrait" },
-    { src: "/casa grande/cuarto1_horizontal.avif", alt: "Dormitorio principal", aspect: "landscape" },
-    { src: "/casa grande/cuarto2_horizontal.avif", alt: "Dormitorio doble", aspect: "landscape" },
-    { src: "/casa grande/cuarto3_horizontal.avif", alt: "Otra habitación", aspect: "landscape" },
-    { src: "/casa grande/cuarto_4.avif", alt: "Habitación adicional", aspect: "landscape" },
+    { src: "/casa grande/cuarto1_horizontal.avif", alt: "Dormitorio principal con cama King", aspect: "landscape" },
+    { src: "/casa grande/cuarto2_horizontal.avif", alt: "Dormitorio múltiple con tres camas de 1 plaza y media", aspect: "landscape" },
+    { src: "/casa grande/cuarto3_horizontal.avif", alt: "Dormitorio doble con dos camas de 2 plazas", aspect: "landscape" },
+    { src: "/casa grande/cuarto_4.avif", alt: "Habitación con cama de 2 plazas", aspect: "landscape" },
   ],
   chalet: [
     { src: "/chalet/terraza.avif", alt: "Chalet durante el día", aspect: "landscape" },
@@ -31,9 +31,9 @@ export const PROPERTY_PHOTOS: Record<string, Photo[]> = {
     { src: "/chalet/mesa_exterior.avif", alt: "Mesa al aire libre", aspect: "landscape" },
     { src: "/chalet/mesa_fulbito.avif", alt: "Mesa de fulbito", aspect: "landscape" },
     { src: "/chalet/cocina.avif", alt: "Cocina", aspect: "landscape" },
-    { src: "/chalet/cuarto_grande.avif", alt: "Cuarto principal", aspect: "landscape" },
-    { src: "/chalet/cuarto_grande_bano.avif", alt: "Baño cuarto principal", aspect: "landscape" },
-    { src: "/chalet/cuarto_pequeno_vertical.avif", alt: "Cuarto adicional", aspect: "portrait" },
+    { src: "/chalet/cuarto_grande.avif", alt: "Dormitorio principal con dos camas de 2 plazas", aspect: "landscape" },
+    { src: "/chalet/cuarto_grande_bano.avif", alt: "Baño completo del dormitorio principal", aspect: "landscape" },
+    { src: "/chalet/cuarto_pequeno_vertical.avif", alt: "Habitación con cama de 2 plazas", aspect: "portrait" },
   ],
 };
 

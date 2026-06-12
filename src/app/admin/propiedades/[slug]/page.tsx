@@ -61,6 +61,7 @@ export default async function PropertyDetailPage({
         <Link
           href={`/${property.slug}`}
           target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm text-teal-deep hover:underline"
         >
           Ver pública
@@ -74,6 +75,7 @@ export default async function PropertyDetailPage({
           <Link
             href={`/${property.slug}#pricing`}
             target="_blank"
+            rel="noopener noreferrer"
             className="text-xs text-teal-deep hover:underline"
           >
             Ver tabla pública

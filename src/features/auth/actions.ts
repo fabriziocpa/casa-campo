@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdminEmail, parseAdminEmails } from "@/features/auth/admin";
 
 export type LoginState = {
   ok: boolean;
@@ -27,16 +28,11 @@ export async function signInWithPassword(
     return { ok: false, message: "Ingresa tu contraseña.", email };
   }
 
-  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
   // Fail closed: require ADMIN_EMAILS configured to avoid login → /admin → /auth/login redirect loop.
-  if (adminEmails.length === 0) {
+  if (parseAdminEmails().length === 0) {
     return { ok: false, message: "Acceso no configurado. Contacta al administrador.", email };
   }
-  if (!adminEmails.includes(email)) {
+  if (!isAdminEmail(email)) {
     return { ok: false, message: "Credenciales inválidas.", email };
   }
 

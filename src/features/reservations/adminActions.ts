@@ -383,6 +383,3 @@ export async function cancelReservation(formData: FormData): Promise<void> {
   await cancelCore(id, notes);
   revalidate(id);
 }
-
-// Re-export internal helper for tests / future event-quote use
-export { findConflicts as findReservationConflicts };

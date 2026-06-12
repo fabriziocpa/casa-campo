@@ -58,7 +58,7 @@ export default async function BrandLandingPage() {
               Desconecta sin prisa. El valle, solo para los tuyos.
             </h1>
             <p className="mt-8 text-lg md:text-xl text-bg/80 max-w-2xl">
-              Casas de campo privadas a orillas del río Moche, a 40 minutos de
+              Casas de campo privadas a orillas del río Moche, a 30 minutos de
               Trujillo. Cada estancia, pensada al detalle: naturaleza, silencio
               y el aire limpio que extrañabas.
             </p>
