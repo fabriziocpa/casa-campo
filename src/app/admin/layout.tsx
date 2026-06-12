@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdminEmail } from "@/features/auth/admin";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 
@@ -16,6 +18,14 @@ export default async function AdminLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Authoritative gate at the server-render layer (mirrors the proxy). Uses the
+  // getUser() call we already make, so this adds no extra round-trip. Ensures no
+  // admin page ever renders to a logged-out or non-allowlisted user even if the
+  // proxy matcher is ever misconfigured.
+  if (!isAdminEmail(user?.email)) {
+    redirect("/auth/login?error=not_admin");
+  }
 
   return (
     <div className="flex bg-teal-soft/25 min-h-screen">
