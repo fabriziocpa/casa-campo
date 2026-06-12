@@ -66,32 +66,6 @@ async function findConflictsForQuote(
   }
 }
 
-// Idempotent: insert this quote's own blocks, skipping rows it already owns
-// (handles re-confirms after a prior partial run).
-async function ensureBlocks(
-  rows: Array<{
-    propertyId: string;
-    date: string;
-    reason: "event" | "event_dependency";
-    eventQuoteId: string;
-    sourcePropertyId: string | null;
-    notes: string | null;
-  }>,
-): Promise<void> {
-  if (rows.length === 0) return;
-  try {
-    await db
-      .insert(blockedDates)
-      .values(rows)
-      .onConflictDoNothing({
-        target: [blockedDates.propertyId, blockedDates.date],
-      });
-  } catch (err) {
-    console.error("[event-quotes] ensureBlocks failed:", err);
-    throw err;
-  }
-}
-
 async function clearBlocksForQuote(quoteId: string): Promise<void> {
   try {
     await db
@@ -456,6 +430,3 @@ export async function bulkDeleteEventQuotes(
   revalidate("", [...propertyIds]);
   return { deleted };
 }
-
-// Kept for backwards-compat in case other call sites import it.
-export { ensureBlocks as ensureEventQuoteBlocks };

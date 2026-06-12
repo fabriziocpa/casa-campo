@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { consentField, honeypot, isoDate, peruPhone } from "@/features/_shared/fields";
 
 export const eventTypes = [
   "boda",
@@ -19,10 +20,6 @@ export const eventTypeLabels: Record<EventType, string> = {
   otro: "Otro",
 };
 
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida");
-
 export const eventQuoteSchema = z.object({
   propertyId: z.guid(),
   packageId: z
@@ -42,24 +39,11 @@ export const eventQuoteSchema = z.object({
   firstName: z.string().trim().min(2, "Ingresa tu nombre"),
   lastName: z.string().trim().min(2, "Ingresa tus apellidos"),
   email: z.string().email("Correo inválido"),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^9\d{8}$/, "Teléfono peruano: 9 dígitos comenzando con 9"),
+  phone: peruPhone,
   message: z.string().max(1000).optional().or(z.literal("")),
 
-  // The client submits via manually-built FormData, so the checkbox boolean
-  // arrives as the string "true". Coerce common truthy encodings back to a
-  // boolean before the literal check — otherwise every submit failed server-side
-  // validation ("missing fields") even though the box was ticked.
-  consent: z.preprocess(
-    (v) => v === true || v === "true" || v === "on" || v === "1",
-    z.literal(true, {
-      message: "Debes aceptar las políticas para continuar",
-    }),
-  ),
-
-  website: z.string().max(0).optional().or(z.literal("")),
+  consent: consentField,
+  website: honeypot,
 });
 
 export type EventQuoteInput = z.infer<typeof eventQuoteSchema>;

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isAdminEmail } from "@/features/auth/admin";
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -32,15 +33,8 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
-    const email = user.email?.toLowerCase();
-
-    // Fail closed: require ADMIN_EMAILS to be set AND user.email present AND in list.
-    if (adminEmails.length === 0 || !email || !adminEmails.includes(email)) {
+    // Fail closed: require ADMIN_EMAILS set AND user.email present AND in list.
+    if (!isAdminEmail(user.email)) {
       return NextResponse.redirect(new URL("/auth/login?error=not_admin", request.url));
     }
   }

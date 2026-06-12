@@ -38,7 +38,7 @@ export function CabanaSection() {
               </li>
               <li className="flex items-center gap-3">
                 <Sparkles className="size-5 text-teal-soft" />
-                Cuatro camas individuales, cocina y baño propios
+                Dos camas de 2 plazas, cocina y baño completo propios
               </li>
             </ul>
           </FadeIn>
