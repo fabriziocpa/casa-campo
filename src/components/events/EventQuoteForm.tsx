@@ -259,7 +259,8 @@ export function EventQuoteForm({
                       {p.name}
                     </p>
                     <p className="mt-1 text-xs text-ink/60">
-                      Hospedaje incluido para {p.includesLodgingCapacity}
+                      Hospedaje únicamente para {p.includesLodgingCapacity}{" "}
+                      personas + {p.maxGuests} invitados
                     </p>
                     <p className="mt-3 text-xl font-semibold text-teal-deep tabular-nums">
                       {formatPEN(p.priceCents)}

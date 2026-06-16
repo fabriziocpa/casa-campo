@@ -53,11 +53,6 @@ export function RoomGrid({ rooms }: { rooms: Room[] }) {
                       <BedDouble className="size-4 text-teal" />
                       {formatBeds(room.beds)}
                     </p>
-                    {room.description && (
-                      <p className="text-sm text-ink/60 leading-relaxed">
-                        {room.description}
-                      </p>
-                    )}
                   </StaggerItem>
                 ))}
               </StaggerChildren>
