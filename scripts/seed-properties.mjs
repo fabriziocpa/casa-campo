@@ -149,20 +149,20 @@ const ROOMS = [
 const AMENITIES = [
   ["c1111111-0000-0000-0000-000000000001", CHALET_ID, "Cocina equipada", "interior", "ChefHat", 0],
   ["c1111111-0000-0000-0000-000000000002", CHALET_ID, "WiFi de alta velocidad", "interior", "Wifi", 1],
-  ["c1111111-0000-0000-0000-000000000003", CHALET_ID, "Chimenea a leña", "interior", "Flame", 2],
+  ["c1111111-0000-0000-0000-000000000003", CHALET_ID, "Fogata", "interior", "Flame", 2],
   ["c1111111-0000-0000-0000-000000000004", CHALET_ID, "TV con streaming", "interior", "Tv", 3],
   ["c1111111-0000-0000-0000-000000000005", CHALET_ID, "Terraza con vista", "exterior", "TreePine", 4],
-  ["c1111111-0000-0000-0000-000000000006", CHALET_ID, "Parrilla a leña", "exterior", "Flame", 5],
+  ["c1111111-0000-0000-0000-000000000006", CHALET_ID, "Parrilla a carbón", "exterior", "Flame", 5],
   ["c1111111-0000-0000-0000-000000000007", CHALET_ID, "Estacionamiento privado", "exterior", "Car", 6],
-  ["c1111111-0000-0000-0000-000000000008", CHALET_ID, "Toallas y blancos premium", "extras", "BedDouble", 7],
-  ["c2222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "Piscina temperada", "exterior", "Waves", 0],
+  ["c1111111-0000-0000-0000-000000000008", CHALET_ID, "Toallas blancas premium", "extras", "BedDouble", 7],
+  ["c2222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "Piscina", "exterior", "Waves", 0],
   ["c2222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "Acceso directo al río", "exterior", "Waves", 1],
   ["c2222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "Parrilla y zona de fogata", "exterior", "Flame", 2],
   ["c2222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "Jardín amplio", "exterior", "TreePine", 3],
-  ["c2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "Cocina industrial", "interior", "ChefHat", 4],
+  ["c2222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "Cocina", "interior", "ChefHat", 4],
   ["c2222222-0000-0000-0000-000000000006", CASA_GRANDE_ID, "WiFi en toda la casa", "interior", "Wifi", 5],
-  ["c2222222-0000-0000-0000-000000000007", CASA_GRANDE_ID, "Sala de juegos", "interior", "Gamepad2", 6],
-  ["c2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "Aire acondicionado", "interior", "Snowflake", 7],
+  ["c2222222-0000-0000-0000-000000000007", CASA_GRANDE_ID, "Área de recreación", "interior", "Gamepad2", 6],
+  ["c2222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "Aire acondicionado (solo en cabaña)", "interior", "Snowflake", 7],
   ["c2222222-0000-0000-0000-000000000009", CASA_GRANDE_ID, "Estacionamiento amplio", "extras", "Car", 8],
   ["c2222222-0000-0000-0000-000000000010", CASA_GRANDE_ID, "Pet-friendly", "extras", "PawPrint", 9],
   ["c2222222-0000-0000-0000-000000000011", CASA_GRANDE_ID, "Cabaña (exclusiva grupos 12+)", "extras", "Home", 10],
@@ -235,7 +235,7 @@ const CONTENT = [
   ["e3222222-0000-0000-0000-000000000008", CASA_GRANDE_ID, "events.value.4.body", "Zonas al aire libre para after-party y momentos íntimos."],
 
   ["e4222222-0000-0000-0000-000000000001", CASA_GRANDE_ID, "events.included.1", "Uso exclusivo de la casa y jardín durante el evento"],
-  ["e4222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "events.included.2", "Mobiliario base: mesas y sillas para el aforo del paquete"],
+  ["e4222222-0000-0000-0000-000000000002", CASA_GRANDE_ID, "events.included.2", "Personal en los baños"],
   ["e4222222-0000-0000-0000-000000000003", CASA_GRANDE_ID, "events.included.3", "Hospedaje incluido para 12 ó 16 personas (según paquete)"],
   ["e4222222-0000-0000-0000-000000000004", CASA_GRANDE_ID, "events.included.4", "Día previo de montaje y día siguiente de desmontaje"],
   ["e4222222-0000-0000-0000-000000000005", CASA_GRANDE_ID, "events.included.5", "Coordinador on-site el día del evento"],
@@ -351,7 +351,11 @@ try {
       ) values (
         ${id}, ${propertyId}, ${name}, ${category}, ${icon}, ${order}, true
       )
-      on conflict (id) do nothing
+      on conflict (id) do update set
+        name = excluded.name,
+        category = excluded.category,
+        icon = excluded.icon,
+        "order" = excluded."order"
     `;
   }
   console.log(`  ${AMENITIES.length} amenities ensured`);

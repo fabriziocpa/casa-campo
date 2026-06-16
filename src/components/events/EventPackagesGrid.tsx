@@ -41,7 +41,8 @@ export function EventPackagesGrid({
                   {p.name}
                 </h3>
                 <p className="mt-1 text-sm text-ink/60">
-                  Hospedaje incluido para {p.includesLodgingCapacity} personas.
+                  Hospedaje únicamente para {p.includesLodgingCapacity} personas
+                  + {p.maxGuests} invitados.
                 </p>
                 <p className="mt-6 text-3xl font-semibold text-teal-deep tabular-nums">
                   {formatPEN(p.priceCents)}
