@@ -234,22 +234,22 @@ export const AMENITIES: Amenity[] = [
   // Chalet
   amenity("amen-c-01", CHALET_ID, "Cocina equipada", "interior", "ChefHat", 0),
   amenity("amen-c-02", CHALET_ID, "WiFi de alta velocidad", "interior", "Wifi", 1),
-  amenity("amen-c-03", CHALET_ID, "Chimenea a leña", "interior", "Flame", 2),
+  amenity("amen-c-03", CHALET_ID, "Fogata", "interior", "Flame", 2),
   amenity("amen-c-04", CHALET_ID, "TV con streaming", "interior", "Tv", 3),
   amenity("amen-c-05", CHALET_ID, "Terraza con vista", "exterior", "TreePine", 4),
-  amenity("amen-c-06", CHALET_ID, "Parrilla a leña", "exterior", "Flame", 5),
+  amenity("amen-c-06", CHALET_ID, "Parrilla a carbón", "exterior", "Flame", 5),
   amenity("amen-c-07", CHALET_ID, "Estacionamiento privado", "exterior", "Car", 6),
-  amenity("amen-c-08", CHALET_ID, "Toallas y blancos premium", "extras", "BedDouble", 7),
+  amenity("amen-c-08", CHALET_ID, "Toallas blancas premium", "extras", "BedDouble", 7),
 
   // Casa Grande
-  amenity("amen-q-01", CASA_GRANDE_ID, "Piscina temperada", "exterior", "Waves", 0),
+  amenity("amen-q-01", CASA_GRANDE_ID, "Piscina", "exterior", "Waves", 0),
   amenity("amen-q-02", CASA_GRANDE_ID, "Acceso directo al río", "exterior", "Waves", 1),
   amenity("amen-q-03", CASA_GRANDE_ID, "Parrilla y zona de fogata", "exterior", "Flame", 2),
   amenity("amen-q-04", CASA_GRANDE_ID, "Jardín amplio", "exterior", "TreePine", 3),
-  amenity("amen-q-05", CASA_GRANDE_ID, "Cocina industrial", "interior", "ChefHat", 4),
+  amenity("amen-q-05", CASA_GRANDE_ID, "Cocina", "interior", "ChefHat", 4),
   amenity("amen-q-06", CASA_GRANDE_ID, "WiFi en toda la casa", "interior", "Wifi", 5),
-  amenity("amen-q-07", CASA_GRANDE_ID, "Sala de juegos", "interior", "Gamepad2", 6),
-  amenity("amen-q-08", CASA_GRANDE_ID, "Aire acondicionado", "interior", "Snowflake", 7),
+  amenity("amen-q-07", CASA_GRANDE_ID, "Área de recreación", "interior", "Gamepad2", 6),
+  amenity("amen-q-08", CASA_GRANDE_ID, "Aire acondicionado (solo en cabaña)", "interior", "Snowflake", 7),
   amenity("amen-q-09", CASA_GRANDE_ID, "Estacionamiento amplio", "extras", "Car", 8),
   amenity("amen-q-10", CASA_GRANDE_ID, "Pet-friendly", "extras", "PawPrint", 9),
   amenity("amen-q-11", CASA_GRANDE_ID, "Cabaña (exclusiva grupos 12+)", "extras", "Home", 10),
@@ -584,7 +584,7 @@ export const CONTENT: Content[] = [
 
   // Incluye / no incluye
   contentRow("c-q-inc-1", CASA_GRANDE_ID, "events.included.1", "Uso exclusivo de la casa y jardín durante el evento"),
-  contentRow("c-q-inc-2", CASA_GRANDE_ID, "events.included.2", "Mobiliario base: mesas y sillas para el aforo del paquete"),
+  contentRow("c-q-inc-2", CASA_GRANDE_ID, "events.included.2", "Personal en los baños"),
   contentRow("c-q-inc-3", CASA_GRANDE_ID, "events.included.3", "Hospedaje incluido para 12 ó 16 personas (según paquete)"),
   contentRow("c-q-inc-4", CASA_GRANDE_ID, "events.included.4", "Día previo de montaje y día siguiente de desmontaje"),
   contentRow("c-q-inc-5", CASA_GRANDE_ID, "events.included.5", "Coordinador on-site el día del evento"),
